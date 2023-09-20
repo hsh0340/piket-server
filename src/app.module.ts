@@ -1,12 +1,12 @@
 import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
-import { AuthModule } from './modules/auth/auth.module';
-import { PrismaModule } from './modules/prisma/prisma.module';
-import { UserModule } from './modules/user/user.module';
-import { HealthModule } from './modules/health/health.module';
 import { ConfigModule } from '@nestjs/config';
 import { LoggerMiddleware } from '@src/common/middlewares/logger.middleware';
+import { AuthModule } from '@src/modules/auth/auth.module';
+import { PrismaModule } from '@src/modules/prisma/prisma.module';
+import { UserModule } from '@src/modules/user/user.module';
+import { HealthModule } from '@src/modules/health/health.module';
+import { AppController } from '@src/app.controller';
+import { AppService } from '@src/app.service';
 
 @Module({
   imports: [

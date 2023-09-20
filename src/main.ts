@@ -1,8 +1,8 @@
 import { NestFactory } from '@nestjs/core';
-import { AppModule } from './app.module';
-import { HttpExceptionFilter } from './common/filters/http-exception.filter';
 import { ConfigService } from '@nestjs/config';
 import helmet from 'helmet';
+import { HttpExceptionFilter } from '@src/common/filters/http-exception.filter';
+import { AppModule } from '@src/app.module';
 
 declare const module: any;
 
