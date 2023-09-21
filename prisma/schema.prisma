@@ -23,7 +23,7 @@ model User {
 model UserAuthentication {
   id                Int       @id @default(autoincrement()) @db.UnsignedInt
   userNo            Int       @map("user_no") @db.UnsignedInt
-  password          String    @db.VarChar(255)
+  password          String?   @db.VarChar(255)
   name              String    @db.VarChar(30)
   cellPhone         String    @unique(map: "cell_phone") @map("cell_phone") @db.VarChar(30)
   sex               Int       @db.UnsignedTinyInt
