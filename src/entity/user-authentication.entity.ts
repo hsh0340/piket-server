@@ -3,7 +3,7 @@ import { UserAuthentication } from '@prisma/client';
 export class UserAuthenticationEntity implements UserAuthentication {
   id: number;
   userNo: number;
-  password: string;
+  password: string | null;
   name: string;
   cellPhone: string;
   sex: number;
