@@ -8,13 +8,35 @@ datasource db {
 }
 
 model User {
-  no        Int       @id @default(autoincrement()) @db.UnsignedInt
-  email     String    @unique(map: "email") @db.VarChar(50)
-  loginType Int       @map("login_type") @db.UnsignedTinyInt
-  role      Int       @default(0) @db.UnsignedTinyInt
-  createdAt DateTime  @default(dbgenerated("CURRENT_TIMESTAMP")) @map("created_at") @db.DateTime(0)
-  updatedAt DateTime  @default(dbgenerated("CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP")) @map("updated_at") @db.DateTime(0)
-  deletedAt DateTime? @map("deleted_at") @db.DateTime(0)
+  no                  Int                  @id @default(autoincrement()) @db.UnsignedInt
+  email               String               @unique(map: "email") @db.VarChar(50)
+  loginType           Int                  @map("login_type") @db.UnsignedTinyInt
+  role                Int                  @default(0) @db.UnsignedTinyInt
+  createdAt           DateTime             @default(now()) @map("created_at") @db.DateTime(0)
+  updatedAt           DateTime             @default(now()) @map("updated_at") @db.DateTime(0)
+  deletedAt           DateTime?            @map("deleted_at") @db.DateTime(0)
+  user_authentication UserAuthentication[]
 
   @@map("user")
+}
+
+model UserAuthentication {
+  id                Int       @id @default(autoincrement()) @db.UnsignedInt
+  userNo            Int       @map("user_no") @db.UnsignedInt
+  password          String    @db.VarChar(255)
+  name              String    @db.VarChar(30)
+  cellPhone         String    @unique(map: "cell_phone") @map("cell_phone") @db.VarChar(30)
+  sex               Int       @db.UnsignedTinyInt
+  tosAgree          Int       @map("tos_agree") @db.UnsignedTinyInt
+  personalInfoAgree Int       @map("personal_info_agree") @db.UnsignedTinyInt
+  ageLimitAgree     Int       @map("age_limit_agree") @db.UnsignedTinyInt
+  mailAgree         Int       @map("mail_agree") @db.UnsignedTinyInt
+  notificationAgree Int       @map("notification_agree") @db.UnsignedTinyInt
+  createdAt         DateTime  @default(now()) @map("created_at") @db.DateTime(0)
+  updatedAt         DateTime  @default(now()) @map("updated_at") @db.DateTime(0)
+  deletedAt         DateTime? @map("deleted_at") @db.DateTime(0)
+  user              User      @relation(fields: [userNo], references: [no], onDelete: NoAction, onUpdate: NoAction, map: "user_authentication_user_no_FK")
+
+  @@index([userNo], map: "user_authentication_user_no_FK")
+  @@map("user_authentication")
 }
