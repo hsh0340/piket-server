@@ -6,7 +6,7 @@ export class UserController {
   constructor(private readonly userService: UserService) {}
 
   // 회원가입 API
-  @Post()
+  @Post('email-join')
   join() {
     return this.userService.join();
   }
