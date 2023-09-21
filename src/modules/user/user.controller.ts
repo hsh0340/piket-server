@@ -7,10 +7,13 @@ export class UserController {
 
   // 회원가입 API
   @Post()
-  join() {}
+  join() {
+    return this.userService.join();
+  }
 
   // 이메일로그인 API
   @Post('login')
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
   login() {}
 
   // 카카오로그인 API
