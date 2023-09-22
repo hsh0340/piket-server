@@ -52,4 +52,6 @@ export class UserService {
       throw new InternalServerErrorException(err);
     }
   }
+
+  // cicd test
 }
