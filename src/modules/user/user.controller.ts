@@ -1,5 +1,6 @@
-import { Controller, Post } from '@nestjs/common';
+import { Body, Controller, Post } from '@nestjs/common';
 import { UserService } from '@src/modules/user/user.service';
+import { EmailJoinRequestDto } from '@src/modules/user/dto/email-join-request.dto';
 
 @Controller('users')
 export class UserController {
@@ -7,8 +8,8 @@ export class UserController {
 
   // 회원가입 API
   @Post('email-join')
-  join() {
-    return this.userService.join();
+  join(@Body() emailJoinRequestDto: EmailJoinRequestDto) {
+    return this.userService.join(emailJoinRequestDto);
   }
 
   // 이메일로그인 API
