@@ -1,6 +1,7 @@
 import { Body, Controller, Post } from '@nestjs/common';
 import { UserService } from '@src/modules/user/user.service';
 import { EmailJoinRequestDto } from '@src/modules/user/dto/email-join-request.dto';
+import { EmailLoginRequestDto } from '@src/modules/user/dto/email-login-request.dto';
 
 @Controller('users')
 export class UserController {
@@ -13,9 +14,11 @@ export class UserController {
   }
 
   // 이메일로그인 API
-  @Post('login')
+  @Post('email-login')
   // eslint-disable-next-line @typescript-eslint/no-empty-function
-  login() {}
+  login(@Body() emailLoginRequestDto: EmailLoginRequestDto) {
+    return this.userService.emailLogin(emailLoginRequestDto);
+  }
 
   // 카카오로그인 API
 

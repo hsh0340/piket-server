@@ -1,6 +1,9 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { EmailJoinRequestDto } from '@src/modules/user/dto/email-join-request.dto';
 import { PrismaService } from '@src/modules/prisma/prisma.service';
+import { ResponseDto } from '@src/common/dto/response.dto';
+import { UserEntity } from '@src/entity/user.entity';
+import { EmailLoginRequestDto } from '@src/modules/user/dto/email-login-request.dto';
 
 @Injectable()
 export class UserService {
@@ -44,7 +47,13 @@ export class UserService {
             notificationAgree,
           },
         });
-        return { isSuccess: true, code: 200, user, userAuth };
+        const successResponse: ResponseDto<UserEntity> = {
+          isSuccess: true,
+          code: 200,
+          message: '유저가 생성되었습니다.',
+          result: user,
+        };
+        return successResponse;
       });
     } catch (err) {
       console.log(err);
@@ -53,5 +62,6 @@ export class UserService {
     }
   }
 
+  emailLogin(emailLoginRequestDto: EmailLoginRequestDto) {}
   // cicd test
 }
