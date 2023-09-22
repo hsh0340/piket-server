@@ -3,6 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import helmet from 'helmet';
 import { HttpExceptionFilter } from '@src/common/filters/http-exception.filter';
 import { AppModule } from '@src/app.module';
+import { ValidationPipe } from '@nestjs/common';
 
 declare const module: any;
 
@@ -14,6 +15,7 @@ async function bootstrap() {
   app.enableCors();
 
   app.useGlobalFilters(new HttpExceptionFilter());
+  app.useGlobalPipes(new ValidationPipe());
 
   const port = configService.get('PORT');
   await app.listen(port);
