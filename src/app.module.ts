@@ -7,6 +7,8 @@ import { UserModule } from '@src/modules/user/user.module';
 import { HealthModule } from '@src/modules/health/health.module';
 import { AppController } from '@src/app.controller';
 import { AppService } from '@src/app.service';
+import { APP_PIPE } from '@nestjs/core';
+import { ValidationPipe } from '@src/common/pipes/validation.pipe';
 
 @Module({
   imports: [
@@ -20,7 +22,13 @@ import { AppService } from '@src/app.service';
     HealthModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [
+    AppService,
+    {
+      provide: APP_PIPE,
+      useClass: ValidationPipe,
+    },
+  ],
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {

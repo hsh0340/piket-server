@@ -1,5 +1,14 @@
-import { IsEnum, IsNotEmpty, IsString, Matches } from 'class-validator';
-import { Agreement } from '@src/common/constants/enum';
+import {
+  Equals,
+  IsEnum,
+  IsInt,
+  IsNotEmpty,
+  IsString,
+  Matches,
+  MaxLength,
+  MinLength,
+} from 'class-validator';
+import { Agreement, Sex } from '@src/common/constants/enum';
 
 export class EmailJoinRequestDto {
   @IsNotEmpty()
@@ -8,36 +17,49 @@ export class EmailJoinRequestDto {
 
   @IsNotEmpty()
   @IsString()
-  @Matches(/^[A-Za-z\d!@#$%^&*()]{8,30}$/)
+  @MinLength(8)
+  @MaxLength(30)
+  @Matches(/^(?=.*[a-zA-Z])(?=.*[!@#$%^*+=-])(?=.*[0-9]).{8,16}$/)
   password: string;
 
   @IsNotEmpty()
   @IsString()
+  @Matches(/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i)
   email: string;
 
   @IsNotEmpty()
   @IsString()
+  @MinLength(2)
+  @MaxLength(5)
   name: string;
 
   @IsNotEmpty()
-  @IsEnum(Agreement)
+  @IsInt()
+  @IsEnum(Sex)
   sex: number;
 
   @IsNotEmpty()
-  @IsEnum(Agreement)
-  tosAgree: number;
+  @IsInt()
+  @Equals(1)
+  tosAgree: Agreement.accept;
 
   @IsNotEmpty()
-  personalInfoAgree: number;
+  @IsInt()
+  @Equals(1)
+  personalInfoAgree: Agreement.accept;
 
   @IsNotEmpty()
-  ageLimitAgree: number;
+  @IsInt()
+  @Equals(1)
+  ageLimitAgree: Agreement.accept;
 
   @IsNotEmpty()
+  @IsInt()
   @IsEnum(Agreement)
   mailAgree: number;
 
   @IsNotEmpty()
+  @IsInt()
   @IsEnum(Agreement)
   notificationAgree: number;
 }
