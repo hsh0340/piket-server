@@ -1,4 +1,5 @@
 import { IsEnum, IsNotEmpty, IsString, Matches } from 'class-validator';
+import { Agreement } from '@src/common/constants/enum';
 
 export class EmailJoinRequestDto {
   @IsNotEmpty()
@@ -19,9 +20,11 @@ export class EmailJoinRequestDto {
   name: string;
 
   @IsNotEmpty()
+  @IsEnum(Agreement)
   sex: number;
 
   @IsNotEmpty()
+  @IsEnum(Agreement)
   tosAgree: number;
 
   @IsNotEmpty()
@@ -31,8 +34,10 @@ export class EmailJoinRequestDto {
   ageLimitAgree: number;
 
   @IsNotEmpty()
+  @IsEnum(Agreement)
   mailAgree: number;
 
   @IsNotEmpty()
+  @IsEnum(Agreement)
   notificationAgree: number;
 }
