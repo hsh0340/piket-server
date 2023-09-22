@@ -1,4 +1,4 @@
-import { IsEnum, IsNotEmpty, IsString, Matches } from "class-validator";
+import { IsEnum, IsNotEmpty, IsString, Matches } from 'class-validator';
 
 export class EmailJoinRequestDto {
   @IsNotEmpty()
