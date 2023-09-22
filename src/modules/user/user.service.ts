@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
-import { PrismaService } from '@src/modules/prisma/prisma.service';
 import { EmailJoinRequestDto } from '@src/modules/user/dto/email-join-request.dto';
+import { PrismaService } from '@src/modules/prisma/prisma.service';
 
 @Injectable()
 export class UserService {
@@ -19,11 +19,31 @@ export class UserService {
       mailAgree,
       notificationAgree,
     } = emailJoinRequestDto;
-    return this.prismaService.user.create({
-      data: {
-        email,
-        loginType: 0, // login type default 값
-      },
+
+    return this.prismaService.$transaction(async (tx) => {
+      const user = await tx.user.create({
+        data: {
+          email,
+          loginType: 0,
+          role: 0,
+        },
+      });
+
+      const userAuth = await tx.userAuthentication.create({
+        data: {
+          userNo: user.no,
+          password,
+          name,
+          cellPhone,
+          sex,
+          tosAgree,
+          personalInfoAgree,
+          ageLimitAgree,
+          mailAgree,
+          notificationAgree,
+        },
+      });
+      return { isSuccess: true, code: 200, user, userAuth };
     });
   }
 }
