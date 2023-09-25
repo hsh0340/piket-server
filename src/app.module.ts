@@ -17,7 +17,7 @@ import { ValidationPipe } from '@src/common/pipes/validation.pipe';
       envFilePath: ['.env'],
     }),
     AuthModule,
-    PrismaModule,
+    // PrismaModule,
     UserModule,
     HealthModule,
   ],
