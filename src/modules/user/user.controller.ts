@@ -20,7 +20,7 @@ export class UserController {
   // 이메일로그인 API
   @Post('email-login')
   // eslint-disable-next-line @typescript-eslint/no-empty-function
-  login(@Body() emailLoginRequestDto: EmailLoginRequestDto) {
+  emailLogin(@Body() emailLoginRequestDto: EmailLoginRequestDto) {
     return this.userService.emailLogin(emailLoginRequestDto);
   }
 
