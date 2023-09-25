@@ -8,10 +8,14 @@ import { PrismaService } from '@src/modules/prisma/prisma.service';
 import { ResponseDto } from '@src/common/dto/response.dto';
 import { UserEntity } from '@src/entity/user.entity';
 import { EmailLoginRequestDto } from '@src/modules/user/dto/email-login-request.dto';
+import { AuthService } from '@src/modules/auth/auth.service';
 
 @Injectable()
 export class UserService {
-  constructor(private readonly prismaService: PrismaService) {}
+  constructor(
+    private readonly prismaService: PrismaService,
+    private readonly authService: AuthService,
+  ) {}
 
   async emailJoin(emailJoinRequestDto: EmailJoinRequestDto) {
     const {
@@ -92,5 +96,6 @@ export class UserService {
     }
 
     // 토큰 발급
+    this.authService.issueJwtToken();
   }
 }
