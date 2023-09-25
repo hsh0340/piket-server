@@ -9,7 +9,7 @@ import { EmailLoginRequestDto } from '@src/modules/user/dto/email-login-request.
 export class UserService {
   constructor(private readonly prismaService: PrismaService) {}
 
-  emailJoin(emailJoinRequestDto: EmailJoinRequestDto) {
+  async emailJoin(emailJoinRequestDto: EmailJoinRequestDto) {
     const {
       cellPhone,
       password,
@@ -24,7 +24,7 @@ export class UserService {
     } = emailJoinRequestDto;
 
     try {
-      this.prismaService.$transaction(async (tx) => {
+      const query = await this.prismaService.$transaction(async (tx) => {
         const user = await tx.user.create({
           data: {
             email,
@@ -47,18 +47,20 @@ export class UserService {
             notificationAgree,
           },
         });
-        const successResponse: ResponseDto<UserEntity> = {
+
+        const result = {
           isSuccess: true,
           code: 200,
           message: '유저가 생성되었습니다.',
           result: user,
         };
-        return successResponse;
-      });
-    } catch (err) {
-      console.log(err);
 
-      throw new InternalServerErrorException(err);
+        console.log(`result: ${result.isSuccess}`);
+        return result;
+      });
+      return query;
+    } catch (err) {
+      throw err;
     }
   }
 

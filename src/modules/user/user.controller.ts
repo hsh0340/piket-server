@@ -9,8 +9,12 @@ export class UserController {
 
   // 회원가입 API
   @Post('email-join')
-  emailJoin(@Body() emailJoinRequestDto: EmailJoinRequestDto) {
-    return this.userService.emailJoin(emailJoinRequestDto);
+  async emailJoin(@Body() emailJoinRequestDto: EmailJoinRequestDto) {
+    console.log('start');
+    const result = await this.userService.emailJoin(emailJoinRequestDto);
+    console.log('end');
+    console.log(result);
+    return result;
   }
 
   // 이메일로그인 API

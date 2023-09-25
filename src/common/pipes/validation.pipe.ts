@@ -15,7 +15,6 @@ export class ValidationPipe implements PipeTransform<any> {
     }
     const object = plainToInstance(metatype, value);
     const errors = await validate(object);
-    console.log(errors);
     if (errors.length > 0) {
       throw new BadRequestException(`유효성 검사에 실패하였습니다. ${errors}`);
     }
