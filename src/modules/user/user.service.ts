@@ -72,6 +72,22 @@ export class UserService {
     }
   }
 
+  async emailCheck(email: string) {
+    const isEmailExist = await this.prismaService.user.findFirst({
+      where: {
+        email,
+      },
+    });
+
+    console.log(isEmailExist);
+
+    if (isEmailExist) {
+      throw new BadRequestException('이미 존재하는 이메일입니다.');
+    }
+
+    return null;
+  }
+
   async emailLogin(emailLoginRequestDto: EmailLoginRequestDto) {
     const { email, password } = emailLoginRequestDto;
     const user = await this.prismaService.user.findFirst({

@@ -18,6 +18,12 @@ export class UserController {
     return result;
   }
 
+  // 이메일 중복체크 API
+  @Post('email-check')
+  emailCheck(@Body('email') email: string) {
+    return this.userService.emailCheck(email);
+  }
+
   // 이메일로그인 API
   @Post('email-login')
   emailLogin(@Body() emailLoginRequestDto: EmailLoginRequestDto) {
