@@ -8,41 +8,39 @@ import {
 } from '@nestjs/common';
 
 import { Request, Response } from 'express';
+import { BaseException } from '@src/common/exceptions/base.exception';
 
-@Catch(HttpException)
+@Catch()
 export class HttpExceptionFilter implements ExceptionFilter {
   private logger = new Logger('exception');
 
-  catch(exception: HttpException, host: ArgumentsHost) {
+  catch(exception: unknown, host: ArgumentsHost) {
     const ctx = host.switchToHttp();
-    const res = ctx.getResponse<Response>();
-    const req = ctx.getRequest<Request>();
+    const request = ctx.getRequest();
+    const response = ctx.getResponse();
 
-    if (!(exception instanceof HttpException)) {
-      exception = new InternalServerErrorException();
-    }
-
+    const res = exception instanceof BaseException ? exception : null;
+    // const res = exception;
     const statusCode = (exception as HttpException).getStatus();
     const message = (exception as HttpException).message;
-    const customCode = (exception.getResponse() as any)?.code;
 
     const errorResponse = {
       isSuccess: false,
-      HttpStatus: statusCode,
-      code: customCode || statusCode,
+      errorCode: res.errorCode,
+      statusCode: res.statusCode,
       message,
     };
 
     const log = {
       name: 'Http Exception',
-      method: req.method,
-      path: req.url,
-      body: req.body,
-      stack: exception.stack,
+      method: request.method,
+      path: request.url,
+      body: request.body,
+      // stack: exception.stack,
     };
 
     this.logger.error(log);
 
-    res.status(statusCode).json(errorResponse);
+    response.status(statusCode).json(errorResponse);
   }
 }
