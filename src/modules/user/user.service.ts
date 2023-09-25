@@ -62,6 +62,8 @@ export class UserService {
     }
   }
 
-  emailLogin(emailLoginRequestDto: EmailLoginRequestDto) {}
-  // cicd test
+  emailLogin(emailLoginRequestDto: EmailLoginRequestDto) {
+    // 1. 이메일을 user에서 찾아서 user id 리턴
+    // 2. user id로 user_auth 테이블 들어가서 비밀번호 비교
+  }
 }
