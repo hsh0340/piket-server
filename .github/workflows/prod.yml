@@ -63,7 +63,7 @@ jobs:
         run: |
           sudo rm -f .env
           touch .env
-          echo DATABASE_URL=${{ secrets.DATABASE_URL }} >> .env
+          echo DATABASE_URL=${{ secrets.DATABASE_URL_DEV }} >> .env
           echo PORT=${{ secrets.PORT }} >> .env
           cat .env
       # 3000 -> 80 포트로 수행하도록 지정
