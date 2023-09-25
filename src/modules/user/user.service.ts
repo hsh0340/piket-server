@@ -1,7 +1,4 @@
-import {
-  BadRequestException,
-  Injectable,
-} from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { EmailJoinRequestDto } from '@src/modules/user/dto/email-join-request.dto';
 import { PrismaService } from '@src/modules/prisma/prisma.service';
 import { EmailLoginRequestDto } from '@src/modules/user/dto/email-login-request.dto';
@@ -53,15 +50,12 @@ export class UserService {
           },
         });
 
-        const result = {
+        return {
           isSuccess: true,
           code: 200,
           message: '유저가 생성되었습니다.',
           result: user,
         };
-
-        console.log(`result: ${result.isSuccess}`);
-        return result;
       });
       return query;
     } catch (err) {
@@ -75,8 +69,6 @@ export class UserService {
         email,
       },
     });
-
-    console.log(isEmailExist);
 
     if (isEmailExist) {
       throw new BadRequestException('이미 존재하는 이메일입니다.');
