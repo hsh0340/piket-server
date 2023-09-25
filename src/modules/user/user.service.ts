@@ -73,6 +73,29 @@ export class UserService {
   }
 
   async emailLogin(emailLoginRequestDto: EmailLoginRequestDto) {
-    return this.authService.issueAccessToken('hi');
+    const { email, password } = emailLoginRequestDto;
+    const user = await this.prismaService.user.findFirst({
+      where: {
+        email,
+      },
+    });
+
+    if (!user) {
+      throw new BadRequestException('존재하지 않는 유저입니다.');
+    }
+
+    const savedAuth = await this.prismaService.userAuthentication.findFirst({
+      where: {
+        userNo: user.no,
+        password,
+      },
+    });
+
+    if (!savedAuth) {
+      throw new BadRequestException('비밀번호가 일치하지 않습니다.');
+    }
+
+    const accessToken = this.authService.issueAccessToken('hi');
+    return { accessToken, user: { ...user, ...savedAuth } };
   }
 }
