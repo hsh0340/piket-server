@@ -1,4 +1,8 @@
-import { Injectable, InternalServerErrorException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  InternalServerErrorException,
+} from '@nestjs/common';
 import { EmailJoinRequestDto } from '@src/modules/user/dto/email-join-request.dto';
 import { PrismaService } from '@src/modules/prisma/prisma.service';
 import { ResponseDto } from '@src/common/dto/response.dto';
@@ -64,8 +68,29 @@ export class UserService {
     }
   }
 
-  emailLogin(emailLoginRequestDto: EmailLoginRequestDto) {
+  async emailLogin(emailLoginRequestDto: EmailLoginRequestDto) {
     // 1. 이메일을 user에서 찾아서 user id 리턴
+    const { email, password } = emailLoginRequestDto;
+    const user = await this.prismaService.user.findFirst({
+      where: {
+        email,
+      },
+    });
+
+    if (!user) {
+      throw new BadRequestException('존재하지 않는 유저입니다.');
+    }
     // 2. user id로 user_auth 테이블 들어가서 비밀번호 비교
+    const savedAuth = await this.prismaService.userAuthentication.findFirst({
+      where: {
+        userNo: user.no,
+      },
+    });
+
+    if (password !== savedAuth.password) {
+      throw new BadRequestException('비밀번호가 다릅니다.');
+    }
+
+    // 토큰 발급
   }
 }
