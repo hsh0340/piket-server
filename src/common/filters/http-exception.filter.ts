@@ -24,15 +24,13 @@ export class HttpExceptionFilter implements ExceptionFilter {
 
     const statusCode = (exception as HttpException).getStatus();
     const message = (exception as HttpException).message;
+    const customCode = (exception.getResponse() as any)?.code;
 
     const errorResponse = {
-      status: statusCode,
-      timestamp: new Date().toISOString(),
-      errors: [
-        {
-          message: message,
-        },
-      ],
+      isSuccess: false,
+      HttpStatus: statusCode,
+      code: customCode || statusCode,
+      message,
     };
 
     const log = {
