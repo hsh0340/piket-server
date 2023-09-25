@@ -8,7 +8,7 @@ import { PrismaService } from '@src/modules/prisma/prisma.service';
 import { ResponseDto } from '@src/common/dto/response.dto';
 import { UserEntity } from '@src/entity/user.entity';
 import { EmailLoginRequestDto } from '@src/modules/user/dto/email-login-request.dto';
-import { AuthService } from '@src/modules/auth/auth.service';
+import { AuthService } from '@src/modules/auth/services/auth.service';
 
 @Injectable()
 export class UserService {
@@ -73,30 +73,6 @@ export class UserService {
   }
 
   async emailLogin(emailLoginRequestDto: EmailLoginRequestDto) {
-    // 1. 이메일을 user에서 찾아서 user id 리턴
-    const { email, password } = emailLoginRequestDto;
-    const user = await this.prismaService.user.findFirst({
-      where: {
-        email,
-      },
-    });
-
-    if (!user) {
-      throw new BadRequestException('존재하지 않는 유저입니다.');
-    }
-    // 2. user id로 user_auth 테이블 들어가서 비밀번호 비교
-    const savedAuth = await this.prismaService.userAuthentication.findFirst({
-      where: {
-        userNo: user.no,
-      },
-    });
-
-    if (password !== savedAuth.password) {
-      throw new BadRequestException('비밀번호가 다릅니다.');
-    }
-
-    // 토큰 발급
-    // user.no는 payload 자리 : 임시로 넣어둠
-    this.authService.issueJwtToken(user.no);
+    return this.authService.issueAccessToken('hi');
   }
 }

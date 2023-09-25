@@ -2,7 +2,6 @@ import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { LoggerMiddleware } from '@src/common/middlewares/logger.middleware';
 import { AuthModule } from '@src/modules/auth/auth.module';
-import { PrismaModule } from '@src/modules/prisma/prisma.module';
 import { UserModule } from '@src/modules/user/user.module';
 import { HealthModule } from '@src/modules/health/health.module';
 import { AppController } from '@src/app.controller';
@@ -17,7 +16,6 @@ import { ValidationPipe } from '@src/common/pipes/validation.pipe';
       envFilePath: ['.env'],
     }),
     AuthModule,
-    // PrismaModule,
     UserModule,
     HealthModule,
   ],

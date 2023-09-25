@@ -1,7 +1,10 @@
 import { Module } from '@nestjs/common';
-import { AuthService } from '@src/modules/auth/auth.service';
+import { AuthController } from './controllers/auth.controller';
+import { AuthService } from './services/auth.service';
 import { JwtModule } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
+import { JwtStrategy } from '@src/modules/auth/jwt/jwt.strategy';
+import { PrismaModule } from '@src/modules/prisma/prisma.module';
 
 @Module({
   imports: [
@@ -14,7 +17,10 @@ import { ConfigService } from '@nestjs/config';
       }),
       inject: [ConfigService],
     }),
+    PrismaModule,
   ],
-  providers: [AuthService],
+  controllers: [AuthController],
+  providers: [AuthService, JwtStrategy],
+  exports: [AuthService],
 })
 export class AuthModule {}
