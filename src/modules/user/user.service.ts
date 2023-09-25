@@ -96,6 +96,7 @@ export class UserService {
     }
 
     // 토큰 발급
-    this.authService.issueJwtToken();
+    // user.no는 payload 자리 : 임시로 넣어둠
+    this.authService.issueJwtToken(user.no);
   }
 }
