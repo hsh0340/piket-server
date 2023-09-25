@@ -9,8 +9,8 @@ export class UserController {
 
   // 회원가입 API
   @Post('email-join')
-  join(@Body() emailJoinRequestDto: EmailJoinRequestDto) {
-    return this.userService.join(emailJoinRequestDto);
+  emailJoin(@Body() emailJoinRequestDto: EmailJoinRequestDto) {
+    return this.userService.emailJoin(emailJoinRequestDto);
   }
 
   // 이메일로그인 API

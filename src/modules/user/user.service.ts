@@ -9,7 +9,7 @@ import { EmailLoginRequestDto } from '@src/modules/user/dto/email-login-request.
 export class UserService {
   constructor(private readonly prismaService: PrismaService) {}
 
-  join(emailJoinRequestDto: EmailJoinRequestDto) {
+  emailJoin(emailJoinRequestDto: EmailJoinRequestDto) {
     const {
       cellPhone,
       password,
