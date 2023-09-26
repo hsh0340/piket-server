@@ -3,8 +3,7 @@ import { EmailJoinRequestDto } from '@src/modules/user/dto/email-join-request.dt
 import { PrismaService } from '@src/modules/prisma/prisma.service';
 import { EmailLoginRequestDto } from '@src/modules/user/dto/email-login-request.dto';
 import { AuthService } from '@src/modules/auth/services/auth.service';
-import { SuccessResponse } from "@src/common/interfaces/response.interface";
-
+import { SuccessResponse } from '@src/common/interfaces/response.interface';
 
 @Injectable()
 export class UserService {
