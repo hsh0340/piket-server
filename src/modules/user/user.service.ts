@@ -53,8 +53,7 @@ export class UserService {
 
         const response: SuccessResponse<{ userNo: number }> = {
           isSuccess: true,
-          code: 1000,
-          httpStatusCode: 200,
+          code: '1000',
           message: '요청에 성공하였습니다.',
           result: { userNo: user.no },
         };
