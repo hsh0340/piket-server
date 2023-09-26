@@ -1,4 +1,9 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  InternalServerErrorException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { EmailJoinRequestDto } from '@src/modules/user/dto/email-join-request.dto';
 import { PrismaService } from '@src/modules/prisma/prisma.service';
 import { EmailLoginRequestDto } from '@src/modules/user/dto/email-login-request.dto';
@@ -26,6 +31,15 @@ export class UserService {
       notificationAgree,
     } = emailJoinRequestDto;
 
+    const isEmailExist = await this.prismaService.userAuthentication.findFirst({
+      where: {
+        cellPhone,
+      },
+    });
+
+    if (isEmailExist) {
+      throw new BadRequestException('이미 존재하는 전화번호입니다.');
+    }
     await this.emailCheck(email);
 
     const query = await this.prismaService.$transaction(async (tx) => {
@@ -74,8 +88,6 @@ export class UserService {
     if (isEmailExist) {
       throw new BadRequestException('이미 존재하는 이메일입니다.');
     }
-
-    return null;
   }
 
   async emailLogin(emailLoginRequestDto: EmailLoginRequestDto) {

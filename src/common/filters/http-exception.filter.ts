@@ -25,12 +25,22 @@ export class HttpExceptionFilter implements ExceptionFilter {
     // const statusCode = (exception as BaseException).getStatus();
     const message = (exception as BaseException).message;
 
-    const errorResponse = {
-      isSuccess: false,
-      errorCode: res.errorCode,
-      httpStatusCode: res.statusCode,
-      message: `예외처리 하지 못한 에러입니다. 관리자에게 문의해주세요. ${message}`,
-    };
+    let errorResponse;
+    if (res.errorCode === '9999') {
+      errorResponse = {
+        isSuccess: false,
+        errorCode: res.errorCode,
+        httpStatusCode: res.statusCode,
+        message: `[예외처리 되지 않은 에러입니다. 관리자에게 문의해주세요.] ${message}`,
+      };
+    } else {
+      errorResponse = {
+        isSuccess: false,
+        errorCode: res.errorCode,
+        httpStatusCode: res.statusCode,
+        message: `${message}`,
+      };
+    }
 
     const log = {
       name: 'Http Exception',
