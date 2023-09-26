@@ -26,44 +26,42 @@ export class UserService {
       notificationAgree,
     } = emailJoinRequestDto;
 
-    try {
-      const query = await this.prismaService.$transaction(async (tx) => {
-        const user = await tx.user.create({
-          data: {
-            email,
-            loginType: 0,
-            role: 0,
-          },
-        });
+    await this.emailCheck(email);
 
-        const userAuth = await tx.userAuthentication.create({
-          data: {
-            userNo: user.no,
-            password,
-            name,
-            cellPhone,
-            sex,
-            tosAgree,
-            personalInfoAgree,
-            ageLimitAgree,
-            mailAgree,
-            notificationAgree,
-          },
-        });
-
-        const response: SuccessResponse<{ userNo: number }> = {
-          isSuccess: true,
-          code: '1000',
-          message: '요청에 성공하였습니다.',
-          result: { userNo: user.no },
-        };
-
-        return response;
+    const query = await this.prismaService.$transaction(async (tx) => {
+      const user = await tx.user.create({
+        data: {
+          email,
+          loginType: 0,
+          role: 0,
+        },
       });
-      return query;
-    } catch (err) {
-      throw err;
-    }
+
+      const userAuth = await tx.userAuthentication.create({
+        data: {
+          userNo: user.no,
+          password,
+          name,
+          cellPhone,
+          sex,
+          tosAgree,
+          personalInfoAgree,
+          ageLimitAgree,
+          mailAgree,
+          notificationAgree,
+        },
+      });
+
+      const response: SuccessResponse<{ userNo: number }> = {
+        isSuccess: true,
+        code: '1000',
+        message: '요청에 성공하였습니다.',
+        result: { userNo: user.no },
+      };
+
+      return response;
+    });
+    return query;
   }
 
   async emailCheck(email: string) {
