@@ -29,7 +29,7 @@ export class HttpExceptionFilter implements ExceptionFilter {
       isSuccess: false,
       errorCode: res.errorCode,
       httpStatusCode: res.statusCode,
-      message,
+      message: `예외처리 하지 못한 에러입니다. 관리자에게 문의해주세요. ${message}`,
     };
 
     const log = {
