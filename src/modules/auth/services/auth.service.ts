@@ -5,12 +5,9 @@ import { JwtService } from '@nestjs/jwt';
 export class AuthService {
   constructor(private readonly jwtService: JwtService) {}
 
-  /**
-   * JWT token 생성 메서드
-   */
-  issueAccessToken(adminId: string): string {
-    const payload = { adminId };
-
+  // access token 생성 메서드
+  issueAccessToken(userNo: number): string {
+    const payload = { userNo };
     return this.jwtService.sign(payload);
   }
 

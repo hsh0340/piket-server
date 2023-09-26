@@ -147,7 +147,8 @@ export class UserService {
       throw new PasswordMismatchException('비밀번호가 일치하지 않습니다.');
     }
 
-    const accessToken = this.authService.issueAccessToken('hi');
+    const payload = user.no;
+    const accessToken = this.authService.issueAccessToken(payload);
     return { accessToken, user: { ...user, ...savedAuth } };
   }
 }
