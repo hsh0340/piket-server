@@ -10,6 +10,7 @@ import {
   PhoneExistException,
   UserNotFoundException,
 } from '@src/common/exceptions/request.exception';
+import { FindEmailRequestDto } from '@src/modules/user/dto/find-email-request.dto';
 
 @Injectable()
 export class UserService {
@@ -150,5 +151,37 @@ export class UserService {
     const payload = user.no;
     const accessToken = this.authService.issueAccessToken(payload);
     return { accessToken, user: { ...user, ...savedAuth } };
+  }
+
+  async findEmail(findEmailRequestDto: FindEmailRequestDto) {
+    const { name, cellPhone } = findEmailRequestDto;
+    const user = await this.prismaService.userAuthentication.findFirst({
+      where: {
+        name,
+        cellPhone,
+      },
+    });
+
+    if (!user) {
+      throw new UserNotFoundException('유저가 존재하지 않습니다.');
+    }
+
+    const userEmail = await this.prismaService.user.findFirst({
+      where: {
+        no: user.userNo,
+      },
+    });
+
+    const response: SuccessResponse<{ userNo: number; email: string }> = {
+      isSuccess: true,
+      code: '1000',
+      message: '요청에 성공하였습니다.',
+      result: {
+        userNo: user.userNo,
+        email: userEmail.email,
+      },
+    };
+
+    return response;
   }
 }

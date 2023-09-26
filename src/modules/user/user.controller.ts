@@ -3,6 +3,7 @@ import { UserService } from '@src/modules/user/user.service';
 import { EmailJoinRequestDto } from '@src/modules/user/dto/email-join-request.dto';
 import { EmailLoginRequestDto } from '@src/modules/user/dto/email-login-request.dto';
 import { AuthGuard } from '@nestjs/passport';
+import { FindEmailRequestDto } from '@src/modules/user/dto/find-email-request.dto';
 
 @Controller('users')
 export class UserController {
@@ -35,7 +36,7 @@ export class UserController {
   // 이메일 찾기 API
   @Post('find-email')
   findEmail(@Body() findEmailRequestDto: FindEmailRequestDto) {
-    return this.userService.findEmail(findEmailRequestDto)
+    return this.userService.findEmail(findEmailRequestDto);
   }
 
   // 로그인 권한 테스트 API
