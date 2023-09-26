@@ -1,9 +1,15 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { EmailJoinRequestDto } from '@src/modules/user/dto/email-join-request.dto';
 import { PrismaService } from '@src/modules/prisma/prisma.service';
 import { EmailLoginRequestDto } from '@src/modules/user/dto/email-login-request.dto';
 import { AuthService } from '@src/modules/auth/services/auth.service';
 import { SuccessResponse } from '@src/common/interfaces/response.interface';
+import {
+  EmailExistException,
+  PasswordMismatchException,
+  PhoneExistException,
+  UserNotFoundException,
+} from '@src/common/exceptions/request.exception';
 
 @Injectable()
 export class UserService {
@@ -33,7 +39,7 @@ export class UserService {
     });
 
     if (isEmailExist) {
-      throw new BadRequestException('이미 존재하는 전화번호입니다.');
+      throw new PhoneExistException('이미 존재하는 전화번호입니다.');
     }
     await this.emailCheck(email);
 
@@ -81,7 +87,7 @@ export class UserService {
     });
 
     if (isEmailExist) {
-      throw new BadRequestException('이미 존재하는 이메일입니다.');
+      throw new EmailExistException('이미 존재하는 이메일입니다.');
     }
   }
 
@@ -94,7 +100,7 @@ export class UserService {
     });
 
     if (!user) {
-      throw new BadRequestException('존재하지 않는 유저입니다.');
+      throw new UserNotFoundException('이 이메일로 가입된 사용자가 없습니다.');
     }
 
     const savedAuth = await this.prismaService.userAuthentication.findFirst({
@@ -105,7 +111,7 @@ export class UserService {
     });
 
     if (!savedAuth) {
-      throw new BadRequestException('비밀번호가 일치하지 않습니다.');
+      throw new PasswordMismatchException('비밀번호가 일치하지 않습니다.');
     }
 
     const accessToken = this.authService.issueAccessToken('hi');
