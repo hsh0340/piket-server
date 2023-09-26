@@ -14,6 +14,12 @@ export class UserController {
     return await this.userService.emailJoin(emailJoinRequestDto);
   }
 
+  // 전화번호 중복체크 API
+  @Post('phone-check')
+  phoneCheck(@Body('cellPhone') cellPhone: string) {
+    return this.userService.phoneCheck(cellPhone);
+  }
+
   // 이메일 중복체크 API
   @Post('email-check')
   emailCheck(@Body('email') email: string) {

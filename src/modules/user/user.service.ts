@@ -79,6 +79,30 @@ export class UserService {
     return query;
   }
 
+  async phoneCheck(cellPhone: string) {
+    const isPhoneExist = await this.prismaService.userAuthentication.findFirst({
+      where: {
+        cellPhone,
+      },
+    });
+
+    console.log(cellPhone);
+    console.log(isPhoneExist);
+
+    if (isPhoneExist) {
+      throw new PhoneExistException('이미 존재하는 전화번호입니다.');
+    }
+
+    const response: SuccessResponse<string> = {
+      isSuccess: true,
+      code: '1000',
+      message: '요청에 성공하였습니다.',
+      result: '사용 가능한 전화번호입니다.',
+    };
+
+    return response;
+  }
+
   async emailCheck(email: string) {
     const isEmailExist = await this.prismaService.user.findFirst({
       where: {
