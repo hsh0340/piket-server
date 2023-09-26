@@ -89,6 +89,15 @@ export class UserService {
     if (isEmailExist) {
       throw new EmailExistException('이미 존재하는 이메일입니다.');
     }
+
+    const response: SuccessResponse<string> = {
+      isSuccess: true,
+      code: '1000',
+      message: '요청에 성공하였습니다.',
+      result: '사용 가능한 이메일입니다.',
+    };
+
+    return response;
   }
 
   async emailLogin(emailLoginRequestDto: EmailLoginRequestDto) {
