@@ -3,7 +3,8 @@ import { EmailJoinRequestDto } from '@src/modules/user/dto/email-join-request.dt
 import { PrismaService } from '@src/modules/prisma/prisma.service';
 import { EmailLoginRequestDto } from '@src/modules/user/dto/email-login-request.dto';
 import { AuthService } from '@src/modules/auth/services/auth.service';
-import { SuccessResponse } from '@src/common/dto/response.dto';
+import { SuccessResponse } from "@src/common/interfaces/response.interface";
+
 
 @Injectable()
 export class UserService {
@@ -53,7 +54,8 @@ export class UserService {
 
         const response: SuccessResponse<{ userNo: number }> = {
           isSuccess: true,
-          code: 200,
+          code: 1000,
+          httpStatusCode: 200,
           message: '요청에 성공하였습니다.',
           result: { userNo: user.no },
         };
