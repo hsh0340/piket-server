@@ -32,6 +32,12 @@ export class UserController {
     return this.userService.emailLogin(emailLoginRequestDto);
   }
 
+  // 이메일 찾기 API
+  @Post('find-email')
+  findEmail(@Body() findEmailRequestDto: FindEmailRequestDto) {
+    return this.userService.findEmail(findEmailRequestDto)
+  }
+
   // 로그인 권한 테스트 API
   @UseGuards(AuthGuard('jwt'))
   @Get('login-test')
