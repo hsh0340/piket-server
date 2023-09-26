@@ -1,9 +1,4 @@
-import {
-  BadRequestException,
-  Injectable,
-  InternalServerErrorException,
-  UnauthorizedException,
-} from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { EmailJoinRequestDto } from '@src/modules/user/dto/email-join-request.dto';
 import { PrismaService } from '@src/modules/prisma/prisma.service';
 import { EmailLoginRequestDto } from '@src/modules/user/dto/email-login-request.dto';
