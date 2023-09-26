@@ -9,6 +9,7 @@ import {
 
 import { Request, Response } from 'express';
 import { BaseException } from '@src/common/exceptions/base.exception';
+import { UnCatchedException } from '@src/common/exceptions/uncatched.exception';
 
 @Catch()
 export class HttpExceptionFilter implements ExceptionFilter {
@@ -19,10 +20,10 @@ export class HttpExceptionFilter implements ExceptionFilter {
     const request = ctx.getRequest();
     const response = ctx.getResponse();
 
-    const res = exception instanceof BaseException ? exception : null;
-    // const res = exception;
-    const statusCode = (exception as HttpException).getStatus();
-    const message = (exception as HttpException).message;
+    const res =
+      exception instanceof BaseException ? exception : new UnCatchedException();
+    // const statusCode = (exception as BaseException).getStatus();
+    const message = (exception as BaseException).message;
 
     const errorResponse = {
       isSuccess: false,
@@ -36,11 +37,11 @@ export class HttpExceptionFilter implements ExceptionFilter {
       method: request.method,
       path: request.url,
       body: request.body,
-      // stack: exception.stack,
+      message,
     };
 
     this.logger.error(log);
 
-    response.status(statusCode).json(errorResponse);
+    response.status(res.statusCode).json(errorResponse);
   }
 }
