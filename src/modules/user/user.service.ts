@@ -1,5 +1,5 @@
 import { randomBytes } from 'crypto';
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { EmailJoinRequestDto } from '@src/modules/user/dto/email-join-request.dto';
 import { PrismaService } from '@src/modules/prisma/prisma.service';
 import { EmailLoginRequestDto } from '@src/modules/user/dto/email-login-request.dto';
@@ -12,10 +12,13 @@ import {
   UserNotFoundException,
 } from '@src/common/exceptions/request.exception';
 import { FindEmailRequestDto } from '@src/modules/user/dto/find-email-request.dto';
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
 
 @Injectable()
 export class UserService {
   constructor(
+    @Inject(CACHE_MANAGER)
+    private readonly cacheManager,
     private readonly prismaService: PrismaService,
     private readonly authService: AuthService,
   ) {}
@@ -221,7 +224,7 @@ export class UserService {
     return response;
   }
 
-  sendPasswordResetEmail(email: string) {
+  async sendPasswordResetEmail(email: string) {
     // 0. 이메일로 회원 정보 찾기
     const user = this.prismaService.user.findFirst({
       where: {
@@ -237,7 +240,9 @@ export class UserService {
     const passwordResetToken = randomBytes(15).toString('base64url');
 
     // 2. 레디스에 회원 고유번호와 무작위 토큰 저장
-
+    await this.cacheManager.set(passwordResetToken, user, {
+      ttl: 60 * 60 * 30,
+    });
     // 3. 메일 발송
   }
 }
