@@ -1,3 +1,4 @@
+import { randomBytes } from 'crypto';
 import { Injectable } from '@nestjs/common';
 import { EmailJoinRequestDto } from '@src/modules/user/dto/email-join-request.dto';
 import { PrismaService } from '@src/modules/prisma/prisma.service';
@@ -233,6 +234,7 @@ export class UserService {
     }
 
     // 1. 무작위 토큰 생성
+    const passwordResetToken = randomBytes(15).toString('base64url');
 
     // 2. 레디스에 회원 고유번호와 무작위 토큰 저장
 
