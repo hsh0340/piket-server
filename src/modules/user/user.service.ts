@@ -226,7 +226,7 @@ export class UserService {
 
   async sendPasswordResetEmail(email: string) {
     // 0. 이메일로 회원 정보 찾기
-    const user = this.prismaService.user.findFirst({
+    const user = await this.prismaService.user.findFirst({
       where: {
         email,
       },
@@ -240,9 +240,12 @@ export class UserService {
     const passwordResetToken = randomBytes(15).toString('base64url');
 
     // 2. 레디스에 회원 고유번호와 무작위 토큰 저장
-    await this.cacheManager.set(passwordResetToken, user, {
+    await this.cacheManager.set(passwordResetToken, user.no, {
       ttl: 60 * 60 * 30,
     });
+
+    return 'hi';
+
     // 3. 메일 발송
   }
 }
