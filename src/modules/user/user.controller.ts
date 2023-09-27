@@ -45,6 +45,12 @@ export class UserController {
     return this.userService.verifyEmail(email);
   }
 
+  // 비밀번호 재설정 메일 발송 API
+  @Post('password-token')
+  sendPasswordResetEmail(@Body('email') email: string) {
+    return this.userService.sendPasswordResetEmail(email);
+  }
+
   // 로그인 권한 테스트 API
   @UseGuards(AuthGuard('jwt'))
   @Get('login-test')
