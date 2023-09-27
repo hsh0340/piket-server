@@ -240,11 +240,9 @@ export class UserService {
     const passwordResetToken = randomBytes(15).toString('base64url');
 
     // 2. 레디스에 회원 고유번호와 무작위 토큰 저장
-    await this.cacheManager.set(passwordResetToken, user.no, {
+    await this.cacheManager.set(user.no, passwordResetToken, {
       ttl: 60 * 60 * 30,
     });
-
-    return 'hi';
 
     // 3. 메일 발송
   }
