@@ -184,4 +184,39 @@ export class UserService {
 
     return response;
   }
+
+  async verifyEmail(email: string) {
+    const user = await this.prismaService.user.findFirst({
+      where: {
+        email,
+      },
+    });
+
+    if (!user) {
+      throw new UserNotFoundException('유저가 존재하지 않습니다.');
+    }
+
+    const userAuth = await this.prismaService.userAuthentication.findFirst({
+      where: {
+        userNo: user.no,
+      },
+    });
+
+    const response: SuccessResponse<{
+      userNo: number;
+      cellPhone: string;
+      email: string;
+    }> = {
+      isSuccess: true,
+      code: '1000',
+      message: '요청에 성공하였습니다.',
+      result: {
+        userNo: user.no,
+        cellPhone: userAuth.cellPhone,
+        email: user.email,
+      },
+    };
+
+    return response;
+  }
 }
