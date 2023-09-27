@@ -13,6 +13,7 @@ import {
 } from '@src/common/exceptions/request.exception';
 import { FindEmailRequestDto } from '@src/modules/user/dto/find-email-request.dto';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
+import { MailerService } from '@nestjs-modules/mailer';
 
 @Injectable()
 export class UserService {
@@ -21,6 +22,7 @@ export class UserService {
     private readonly cacheManager,
     private readonly prismaService: PrismaService,
     private readonly authService: AuthService,
+    private readonly mailerService: MailerService,
   ) {}
 
   async emailJoin(emailJoinRequestDto: EmailJoinRequestDto) {
@@ -245,5 +247,20 @@ export class UserService {
     });
 
     // 3. 메일 발송
+    await this.mailerService.sendMail({
+      from: 'hsh0340@naver.com',
+      to: user.email,
+      subject: '비밀번호 초기화 이메일입니다.',
+      html: `비밀번호 초기화를 위해서는 아래의 URL을 클릭하여 주세요. http://example/reset-password/${passwordResetToken}`,
+    });
+
+    const response: SuccessResponse<string> = {
+      isSuccess: true,
+      code: '1000',
+      message: '요청에 성공하였습니다.',
+      result: '이메일 발송에 성공하였습니다.',
+    };
+
+    return response;
   }
 }

@@ -68,6 +68,9 @@ jobs:
           echo JWT_SECRET_KEY=${{ secrets.JWT_SECRET_KEY }} >> .env
           echo CACHE_HOST=${{ secrets.CACHE_HOST }} >> .env
           echo CACHE_PORT=${{ secrets.CACHE_PORT }} >> .env
+          echo EMAIL_HOST=${{ secrets.CACHE_PORT }} >> .env
+          echo EMAIL_AUTH_USER=${{ secrets.CACHE_PORT }} >> .env
+          echo EMAIL_AUTH_PASSWORD=${{ secrets.CACHE_PORT }} >> .env
           echo PORT=${{ secrets.PORT }} >> .env
           cat .env
       # 3000 -> 80 포트로 수행하도록 지정

@@ -12,36 +12,34 @@ import { MailerModule } from '@nestjs-modules/mailer';
   imports: [
     AuthModule,
     PrismaModule,
-    CacheModule.register({
-      store: redisStore,
-      host: '127.0.0.1',
-      port: 6379,
-      ttl: 100000, // 없는 경우 default 5초
-    }),
-    // CacheModule.registerAsync({
-    //   useFactory: (configService: ConfigService) => ({
-    //     store: redisStore,
-    //     host: configService.get<string>('CACHE_HOST'),
-    //     port: configService.get<number>('CACHE_PORT'),
-    //     ttl: 100000,
-    //   }),
-    //   inject: [ConfigService],
+    // CacheModule.register({
+    //   store: redisStore,
+    //   host: '127.0.0.1',
+    //   port: 6379,
+    //   ttl: 100000, // 없는 경우 default 5초
     // }),
+    CacheModule.registerAsync({
+      useFactory: (configService: ConfigService) => ({
+        store: redisStore,
+        host: configService.get<string>('CACHE_HOST'),
+        port: configService.get<number>('CACHE_PORT'),
+        ttl: 100000,
+      }),
+      inject: [ConfigService],
+    }),
     MailerModule.forRootAsync({
-      useFactory: () => ({
+      useFactory: (configService: ConfigService) => ({
         transport: {
-          host: 'smtp.example.com',
-          port: 587,
+          host: configService.get<string>('EMAIL_HOST'),
+          port: 465,
+          secure: true,
           auth: {
-            user: 'email address',
-            pass: 'password',
+            user: configService.get<string>('EMAIL_AUTH_USER'),
+            pass: configService.get<string>('EMAIL_AUTH_PASSWORD'),
           },
         },
-        defaults: {
-          from: '"no-reply" <email address>',
-        },
-        preview: true,
       }),
+      inject: [ConfigService],
     }),
   ],
   providers: [UserService],
