@@ -39,6 +39,12 @@ export class UserController {
     return this.userService.findEmail(findEmailRequestDto);
   }
 
+  // 비밀번호 찾기 - 이메일 검증 API
+  @Post('verify-email')
+  verifyEmail(@Body('email') email: string) {
+    return this.userService.verifyEmail(email);
+  }
+
   // 로그인 권한 테스트 API
   @UseGuards(AuthGuard('jwt'))
   @Get('login-test')
