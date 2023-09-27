@@ -219,4 +219,23 @@ export class UserService {
 
     return response;
   }
+
+  sendPasswordResetEmail(email: string) {
+    // 0. 이메일로 회원 정보 찾기
+    const user = this.prismaService.user.findFirst({
+      where: {
+        email,
+      },
+    });
+
+    if (!user) {
+      throw new UserNotFoundException('유저가 존재하지 않습니다.');
+    }
+
+    // 1. 무작위 토큰 생성
+
+    // 2. 레디스에 회원 고유번호와 무작위 토큰 저장
+
+    // 3. 메일 발송
+  }
 }
