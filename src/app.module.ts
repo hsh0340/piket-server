@@ -1,5 +1,5 @@
 import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { LoggerMiddleware } from '@src/common/middlewares/logger.middleware';
 import { AuthModule } from '@src/modules/auth/auth.module';
 import { UserModule } from '@src/modules/user/user.module';
@@ -8,12 +8,23 @@ import { AppController } from '@src/app.controller';
 import { AppService } from '@src/app.service';
 import { APP_PIPE } from '@nestjs/core';
 import { ValidationPipe } from '@src/common/pipes/validation.pipe';
+import { CacheModule } from '@nestjs/cache-manager';
+import * as redisStore from 'cache-manager-ioredis';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: ['.env'],
+    }),
+    CacheModule.registerAsync({
+      useFactory: (configService: ConfigService) => ({
+        store: redisStore,
+        host: configService.get<string>('CACHE_HOST'),
+        port: configService.get<string>('CACHE_PORT'),
+        ttl: 100000,
+      }),
+      inject: [ConfigService],
     }),
     AuthModule,
     UserModule,
