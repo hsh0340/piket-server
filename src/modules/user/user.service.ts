@@ -112,13 +112,9 @@ export class UserService {
 
   async emailCheck(emailDto: EmailDto) {
     const { email } = emailDto;
-    const isEmailExist = await this.prismaService.user.findFirst({
-      where: {
-        email,
-      },
-    });
+    const user = await this.getUserByEmail(email);
 
-    if (isEmailExist) {
+    if (user) {
       throw new EmailExistException();
     }
 
@@ -134,16 +130,10 @@ export class UserService {
 
   async emailLogin(emailLoginRequestDto: EmailLoginRequestDto) {
     const { email, password } = emailLoginRequestDto;
-    const user = await this.prismaService.user.findFirst({
-      where: {
-        email,
-      },
-    });
-
+    const user = await this.getUserByEmail(email);
     if (!user) {
       throw new UserNotFoundException();
     }
-
     const savedAuth = await this.prismaService.userAuthentication.findFirst({
       where: {
         userNo: user.no,
@@ -194,16 +184,10 @@ export class UserService {
 
   async verifyEmail(emailDto: EmailDto) {
     const { email } = emailDto;
-    const user = await this.prismaService.user.findFirst({
-      where: {
-        email,
-      },
-    });
-
+    const user = await this.getUserByEmail(email);
     if (!user) {
       throw new UserNotFoundException();
     }
-
     const userAuth = await this.prismaService.userAuthentication.findFirst({
       where: {
         userNo: user.no,
@@ -235,27 +219,15 @@ export class UserService {
       },
     });
 
-    if (!user) {
-      throw new UserNotFoundException();
-    }
-
     return user;
   }
 
   async sendPasswordResetEmail(emailDto: EmailDto) {
     const { email } = emailDto;
-    // 0. 이메일로 회원 정보 찾기
-    // const user = await this.prismaService.user.findFirst({
-    //   where: {
-    //     email,
-    //   },
-    // });
-    //
-    // if (!user) {
-    //   throw new UserNotFoundException();
-    // }
-
     const user = await this.getUserByEmail(email);
+    if (!user) {
+      throw new UserNotFoundException();
+    }
 
     // 1. 무작위 토큰 생성
     const passwordResetToken = randomBytes(15).toString('base64url');
