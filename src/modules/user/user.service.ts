@@ -14,7 +14,8 @@ import {
 import { FindEmailRequestDto } from '@src/modules/user/dto/find-email-request.dto';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { MailerService } from '@nestjs-modules/mailer';
-import { CellPhoneDto } from "@src/modules/user/dto/cell-phone.dto";
+import { CellPhoneDto } from '@src/modules/user/dto/cell-phone.dto';
+import { EmailDto } from '@src/modules/user/dto/email.dto';
 
 @Injectable()
 export class UserService {
@@ -49,7 +50,7 @@ export class UserService {
     if (isEmailExist) {
       throw new PhoneExistException('이미 존재하는 전화번호입니다.');
     }
-    await this.emailCheck(email);
+    await this.emailCheck({ email });
 
     const query = await this.prismaService.$transaction(async (tx) => {
       const user = await tx.user.create({
@@ -109,7 +110,8 @@ export class UserService {
     return response;
   }
 
-  async emailCheck(email: string) {
+  async emailCheck(emailDto: EmailDto) {
+    const { email } = emailDto;
     const isEmailExist = await this.prismaService.user.findFirst({
       where: {
         email,
@@ -190,7 +192,8 @@ export class UserService {
     return response;
   }
 
-  async verifyEmail(email: string) {
+  async verifyEmail(emailDto: EmailDto) {
+    const { email } = emailDto;
     const user = await this.prismaService.user.findFirst({
       where: {
         email,
@@ -225,7 +228,8 @@ export class UserService {
     return response;
   }
 
-  async sendPasswordResetEmail(email: string) {
+  async sendPasswordResetEmail(emailDto: EmailDto) {
+    const { email } = emailDto;
     // 0. 이메일로 회원 정보 찾기
     const user = await this.prismaService.user.findFirst({
       where: {

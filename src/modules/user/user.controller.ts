@@ -4,7 +4,8 @@ import { EmailJoinRequestDto } from '@src/modules/user/dto/email-join-request.dt
 import { EmailLoginRequestDto } from '@src/modules/user/dto/email-login-request.dto';
 import { AuthGuard } from '@nestjs/passport';
 import { FindEmailRequestDto } from '@src/modules/user/dto/find-email-request.dto';
-import { CellPhoneDto } from "@src/modules/user/dto/cell-phone.dto";
+import { CellPhoneDto } from '@src/modules/user/dto/cell-phone.dto';
+import { EmailDto } from '@src/modules/user/dto/email.dto';
 
 @Controller('users')
 export class UserController {
@@ -24,8 +25,8 @@ export class UserController {
 
   // 이메일 중복체크 API
   @Post('email-check')
-  emailCheck(@Body('email') email: string) {
-    return this.userService.emailCheck(email);
+  emailCheck(@Body('email') emailDto: EmailDto) {
+    return this.userService.emailCheck(emailDto);
   }
 
   // 이메일로그인 API
@@ -42,14 +43,14 @@ export class UserController {
 
   // 비밀번호 찾기 - 이메일 검증 API
   @Post('verify-email')
-  verifyEmail(@Body('email') email: string) {
-    return this.userService.verifyEmail(email);
+  verifyEmail(@Body('email') emailDto: EmailDto) {
+    return this.userService.verifyEmail(emailDto);
   }
 
   // 비밀번호 재설정 메일 발송 API
   @Post('password-token')
-  sendPasswordResetEmail(@Body('email') email: string) {
-    return this.userService.sendPasswordResetEmail(email);
+  sendPasswordResetEmail(@Body('email') emailDto: EmailDto) {
+    return this.userService.sendPasswordResetEmail(emailDto);
   }
 
   // 로그인 권한 테스트 API
