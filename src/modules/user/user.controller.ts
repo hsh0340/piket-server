@@ -19,13 +19,13 @@ export class UserController {
 
   // 전화번호 중복체크 API
   @Post('phone-check')
-  phoneCheck(@Body('cellPhone') cellPhone: CellPhoneDto) {
+  phoneCheck(@Body() cellPhone: CellPhoneDto) {
     return this.userService.phoneCheck(cellPhone);
   }
 
   // 이메일 중복체크 API
   @Post('email-check')
-  emailCheck(@Body('email') emailDto: EmailDto) {
+  emailCheck(@Body() emailDto: EmailDto) {
     return this.userService.emailCheck(emailDto);
   }
 
@@ -43,13 +43,13 @@ export class UserController {
 
   // 비밀번호 찾기 - 이메일 검증 API
   @Post('verify-email')
-  verifyEmail(@Body('email') emailDto: EmailDto) {
+  verifyEmail(@Body() emailDto: EmailDto) {
     return this.userService.verifyEmail(emailDto);
   }
 
   // 비밀번호 재설정 메일 발송 API
   @Post('password-token')
-  sendPasswordResetEmail(@Body('email') emailDto: EmailDto) {
+  sendPasswordResetEmail(@Body() emailDto: EmailDto) {
     return this.userService.sendPasswordResetEmail(emailDto);
   }
 
