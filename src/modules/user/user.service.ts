@@ -48,7 +48,7 @@ export class UserService {
     });
 
     if (isEmailExist) {
-      throw new PhoneExistException('이미 존재하는 전화번호입니다.');
+      throw new PhoneExistException();
     }
     await this.emailCheck({ email });
 
@@ -97,7 +97,7 @@ export class UserService {
     });
 
     if (isPhoneExist) {
-      throw new PhoneExistException('이미 존재하는 전화번호입니다.');
+      throw new PhoneExistException();
     }
 
     const response: SuccessResponse<string> = {
@@ -119,7 +119,7 @@ export class UserService {
     });
 
     if (isEmailExist) {
-      throw new EmailExistException('이미 존재하는 이메일입니다.');
+      throw new EmailExistException();
     }
 
     const response: SuccessResponse<string> = {
@@ -141,7 +141,7 @@ export class UserService {
     });
 
     if (!user) {
-      throw new UserNotFoundException('이 이메일로 가입된 사용자가 없습니다.');
+      throw new UserNotFoundException();
     }
 
     const savedAuth = await this.prismaService.userAuthentication.findFirst({
@@ -152,7 +152,7 @@ export class UserService {
     });
 
     if (!savedAuth) {
-      throw new PasswordMismatchException('비밀번호가 일치하지 않습니다.');
+      throw new PasswordMismatchException();
     }
 
     const payload = user.no;
@@ -170,7 +170,7 @@ export class UserService {
     });
 
     if (!user) {
-      throw new UserNotFoundException('유저가 존재하지 않습니다.');
+      throw new UserNotFoundException();
     }
 
     const userEmail = await this.prismaService.user.findFirst({
@@ -201,7 +201,7 @@ export class UserService {
     });
 
     if (!user) {
-      throw new UserNotFoundException('유저가 존재하지 않습니다.');
+      throw new UserNotFoundException();
     }
 
     const userAuth = await this.prismaService.userAuthentication.findFirst({
@@ -238,7 +238,7 @@ export class UserService {
     });
 
     if (!user) {
-      throw new UserNotFoundException('유저가 존재하지 않습니다.');
+      throw new UserNotFoundException();
     }
 
     // 1. 무작위 토큰 생성

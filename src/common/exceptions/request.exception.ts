@@ -10,29 +10,29 @@ export class InvalidRequestException extends BaseException {
 }
 
 export class PhoneExistException extends BaseException {
-  constructor(message: string) {
+  constructor() {
     super(RequestExceptionCodeEnum.PhoneExist, HttpStatus.BAD_REQUEST);
-    this.message = message;
+    this.message = '이미 존재하는 전화번호입니다.';
   }
 }
 
 export class EmailExistException extends BaseException {
-  constructor(message: string) {
+  constructor() {
     super(RequestExceptionCodeEnum.EmailExist, HttpStatus.BAD_REQUEST);
-    this.message = message;
+    this.message = '이미 존재하는 이메일입니다.';
   }
 }
 
 export class UserNotFoundException extends BaseException {
-  constructor(message: string) {
+  constructor() {
     super(RequestExceptionCodeEnum.UserNotFound, HttpStatus.BAD_REQUEST);
-    this.message = message;
+    this.message = '존재하지 않는 사용자입니다.';
   }
 }
 
 export class PasswordMismatchException extends BaseException {
-  constructor(message: string) {
+  constructor() {
     super(RequestExceptionCodeEnum.PasswordMismatch, HttpStatus.BAD_REQUEST);
-    this.message = message;
+    this.message = '이메일과 비밀번호가 일치하지 않습니다.';
   }
 }
