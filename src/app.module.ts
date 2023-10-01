@@ -17,16 +17,11 @@ import * as redisStore from 'cache-manager-ioredis';
       isGlobal: true,
       envFilePath: ['.env'],
     }),
-    // CacheModule.register({
-    //   store: redisStore,
-    //   host: '127.0.0.1',
-    //   port: 6379,
-    //   ttl: 100000, // 없는 경우 default 5초
-    // }),
     CacheModule.registerAsync({
       useFactory: (configService: ConfigService) => ({
         store: redisStore,
-        host: configService.get<string>('CACHE_HOST'),
+        // host: configService.get<string>('CACHE_HOST'),
+        host: '127.0.0.1',
         port: configService.get<number>('CACHE_PORT'),
         ttl: 100000,
       }),
