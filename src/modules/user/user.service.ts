@@ -14,6 +14,7 @@ import {
 import { FindEmailRequestDto } from '@src/modules/user/dto/find-email-request.dto';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { MailerService } from '@nestjs-modules/mailer';
+import { CellPhoneDto } from "@src/modules/user/dto/cell-phone.dto";
 
 @Injectable()
 export class UserService {
@@ -86,15 +87,13 @@ export class UserService {
     return query;
   }
 
-  async phoneCheck(cellPhone: string) {
+  async phoneCheck(cellPhoneDto: CellPhoneDto) {
+    const { cellPhone } = cellPhoneDto;
     const isPhoneExist = await this.prismaService.userAuthentication.findFirst({
       where: {
         cellPhone,
       },
     });
-
-    console.log(cellPhone);
-    console.log(isPhoneExist);
 
     if (isPhoneExist) {
       throw new PhoneExistException('이미 존재하는 전화번호입니다.');

@@ -4,6 +4,7 @@ import { EmailJoinRequestDto } from '@src/modules/user/dto/email-join-request.dt
 import { EmailLoginRequestDto } from '@src/modules/user/dto/email-login-request.dto';
 import { AuthGuard } from '@nestjs/passport';
 import { FindEmailRequestDto } from '@src/modules/user/dto/find-email-request.dto';
+import { CellPhoneDto } from "@src/modules/user/dto/cell-phone.dto";
 
 @Controller('users')
 export class UserController {
@@ -17,7 +18,7 @@ export class UserController {
 
   // 전화번호 중복체크 API
   @Post('phone-check')
-  phoneCheck(@Body('cellPhone') cellPhone: string) {
+  phoneCheck(@Body('cellPhone') cellPhone: CellPhoneDto) {
     return this.userService.phoneCheck(cellPhone);
   }
 
