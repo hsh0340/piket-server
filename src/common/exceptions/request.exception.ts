@@ -26,7 +26,7 @@ export class EmailExistException extends BaseException {
 export class UserNotFoundException extends BaseException {
   constructor() {
     super(RequestExceptionCodeEnum.UserNotFound, HttpStatus.BAD_REQUEST);
-    this.message = '존재하지 않는 사용자입니다.';
+    this.message = '이 이메일로 가입된 사용자가 없습니다.';
   }
 }
 
