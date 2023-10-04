@@ -1,9 +1,10 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { AuthService } from '../services/auth.service';
 import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '@src/modules/prisma/prisma.service';
+import { UserNotFoundException } from '@src/common/exceptions/request.exception';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
@@ -14,21 +15,31 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   ) {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
-      ignoreExpiration: false,
+      ignoreExpiration: true,
       secretOrKey: configService.get<string>('JWT_SECRET_KEY'),
     });
   }
 
   async validate(payload: any) {
-    // const { adminId } = payload;
-    // const admin: Admin = await this.prismaService.admin.findFirst({
-    //   where: { adminId },
-    // });
-    //
-    // if (!admin) {
-    //   throw new UnauthorizedException();
-    // }
-    // return admin;
-    return 'hi';
+    // 유효한 유저인지 확인
+    const { userNo, exp } = payload;
+    const user = await this.prismaService.user.findFirst({
+      where: {
+        no: userNo,
+      },
+    });
+
+    if (!user) {
+      throw new UserNotFoundException();
+    }
+
+    // access token 유효시간 지났는지 확인
+    const currentTime = Date.now() / 1000;
+    console.log(currentTime);
+    if (currentTime > exp) {
+      throw new UnauthorizedException('유효기간 만료');
+    }
+
+    return user;
   }
 }

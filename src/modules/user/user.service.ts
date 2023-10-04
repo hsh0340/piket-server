@@ -148,6 +148,7 @@ export class UserService {
 
     const payload = user.no;
     const accessToken = this.authService.issueAccessToken(payload);
+    const refreshToken = await this.authService.issueRefreshToken(payload);
 
     const response: SuccessResponse<any> = {
       isSuccess: true,
@@ -155,6 +156,7 @@ export class UserService {
       message: '요청에 성공하였습니다.',
       result: {
         accessToken,
+        refreshToken,
         userNo: user.no,
         userName: savedAuth.name,
       },
