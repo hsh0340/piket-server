@@ -41,15 +41,16 @@ export class UserService {
       notificationAgree,
     } = emailJoinRequestDto;
 
-    const isEmailExist = await this.prismaService.userAuthentication.findFirst({
+    const user = await this.prismaService.userAuthentication.findFirst({
       where: {
         cellPhone,
       },
     });
 
-    if (isEmailExist) {
+    if (user) {
       throw new PhoneExistException();
     }
+
     await this.emailCheck({ email });
 
     const query = await this.prismaService.$transaction(async (tx) => {
