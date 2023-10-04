@@ -148,7 +148,19 @@ export class UserService {
 
     const payload = user.no;
     const accessToken = this.authService.issueAccessToken(payload);
-    return { accessToken, user: { ...user, ...savedAuth } };
+
+    const response: SuccessResponse<any> = {
+      isSuccess: true,
+      code: '1000',
+      message: '요청에 성공하였습니다.',
+      result: {
+        accessToken,
+        userNo: user.no,
+        userName: savedAuth.name,
+      },
+    };
+
+    return response;
   }
 
   async findEmail(findEmailRequestDto: FindEmailRequestDto) {
