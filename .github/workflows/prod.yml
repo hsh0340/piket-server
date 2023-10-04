@@ -70,7 +70,7 @@ jobs:
           echo CACHE_PORT=${{ secrets.CACHE_PORT }} >> .env
           echo EMAIL_HOST=${{ secrets.EMAIL_HOST }} >> .env
           echo EMAIL_AUTH_USER=${{ secrets.EMAIL_AUTH_USER }} >> .env
-          echo EMAIL_AUTH_PASSWORD=${{ secrets.AUTH_PASSWORD }} >> .env
+          echo EMAIL_AUTH_PASSWORD=${{ secrets.EMAIL_AUTH_PASSWORD }} >> .env
           echo PORT=${{ secrets.PORT }} >> .env
           cat .env
       # 3000 -> 80 포트로 수행하도록 지정
