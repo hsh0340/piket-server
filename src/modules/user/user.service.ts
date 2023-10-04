@@ -271,4 +271,6 @@ export class UserService {
   verifyPasswordToken(token: string) {
     // 토큰 유효시간 검증
   }
+
+  resetPassword(token: string, newPassword: string) {}
 }
