@@ -53,11 +53,13 @@ export class UserController {
     return this.userService.sendPasswordResetEmail(emailDto);
   }
 
+  // 비밀번호 재설정 토큰 검증 API
   @Get('reset-password/:token')
   verifyPasswordToken(@Param('token') token: string) {
     return this.userService.verifyPasswordToken(token);
   }
 
+  // 비밀번호 재설정 API
   @Post('reset-password/:token')
   resetPassword(
     @Param('token') token: string,
