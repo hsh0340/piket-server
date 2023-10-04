@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, UseGuards } from "@nestjs/common";
 import { UserService } from '@src/modules/user/user.service';
 import { EmailJoinRequestDto } from '@src/modules/user/dto/email-join-request.dto';
 import { EmailLoginRequestDto } from '@src/modules/user/dto/email-login-request.dto';
@@ -51,6 +51,11 @@ export class UserController {
   @Post('send-password-reset-email')
   sendPasswordResetEmail(@Body() emailDto: EmailDto) {
     return this.userService.sendPasswordResetEmail(emailDto);
+  }
+
+  @Get('reset-password/:token')
+  verifyPasswordToken(@Param('token') token: string) {
+    return this.userService.verifyPasswordToken(token);
   }
 
   // 로그인 권한 테스트 API

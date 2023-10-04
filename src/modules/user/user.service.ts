@@ -267,4 +267,8 @@ export class UserService {
 
     return response;
   }
+
+  verifyPasswordToken(token: string) {
+    // 토큰 유효시간 검증
+  }
 }
