@@ -41,10 +41,10 @@ export class UserController {
     return this.userService.findEmail(findEmailRequestDto);
   }
 
-  // 비밀번호 찾기 - 이메일 검증 API
-  @Post('verify-email')
+  // 비밀번호 찾기
+  @Post('find-password')
   verifyEmail(@Body() emailDto: EmailDto) {
-    return this.userService.verifyEmail(emailDto);
+    return this.userService.findPassword(emailDto);
   }
 
   // 비밀번호 재설정 메일 발송 API

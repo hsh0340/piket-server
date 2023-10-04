@@ -195,7 +195,7 @@ export class UserService {
     return response;
   }
 
-  async verifyEmail(emailDto: EmailDto) {
+  async findPassword(emailDto: EmailDto) {
     const { email } = emailDto;
     const user = await this.getUserByEmail(email);
     if (!user) {
