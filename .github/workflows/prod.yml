@@ -65,6 +65,7 @@ jobs:
           touch .env
           echo DATABASE_URL=${{ secrets.DATABASE_URL_DEV }} >> .env
           echo ACCESS_TOKEN_EXPIRATION=${{ secrets.ACCESS_TOKEN_EXPIRATION }} >> .env
+          echo REFRESH_TOKEN_EXPIRATION=${{ secrets.REFRESH_TOKEN_EXPIRATION }} >> .env
           echo JWT_SECRET_KEY=${{ secrets.JWT_SECRET_KEY }} >> .env
           echo CACHE_HOST=${{ secrets.CACHE_HOST }} >> .env
           echo CACHE_PORT=${{ secrets.CACHE_PORT }} >> .env
