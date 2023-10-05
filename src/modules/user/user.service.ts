@@ -1,5 +1,5 @@
 import { randomBytes } from 'crypto';
-import { Inject, Injectable } from '@nestjs/common';
+import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 import { EmailJoinRequestDto } from '@src/modules/user/dto/email-join-request.dto';
 
 import { EmailLoginRequestDto } from '@src/modules/user/dto/email-login-request.dto';
@@ -323,5 +323,36 @@ export class UserService {
     // 토큰 유효시간 검증
   }
 
-  resetPassword(token: string, newPassword: string) {}
+  async resetPassword(userNo: number, tempPassword, newPassword: string) {
+    const userAuth = await this.prismaService.userAuthentication.findFirst({
+      where: {
+        userNo,
+      },
+    });
+
+    console.log(userAuth.password);
+    console.log(tempPassword);
+
+    if (userAuth.password !== tempPassword) {
+      throw new BadRequestException('임시 비밀번호가 틀렸습니다.');
+    }
+
+    await this.prismaService.userAuthentication.updateMany({
+      where: {
+        userNo,
+      },
+      data: {
+        password: newPassword,
+      },
+    });
+
+    const response: SuccessResponse<string> = {
+      isSuccess: true,
+      code: '1000',
+      message: '요청에 성공하였습니다.',
+      result: '비밀번호 변경에 성공하였습니다.',
+    };
+
+    return response;
+  }
 }

@@ -1,4 +1,12 @@
-import { Body, Controller, Get, Param, Post, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  ParseIntPipe,
+  Post,
+  UseGuards,
+} from '@nestjs/common';
 import { UserService } from '@src/modules/user/user.service';
 import { EmailJoinRequestDto } from '@src/modules/user/dto/email-join-request.dto';
 import { EmailLoginRequestDto } from '@src/modules/user/dto/email-login-request.dto';
@@ -47,25 +55,20 @@ export class UserController {
     return this.userService.findPassword(emailDto);
   }
 
-  // 임시비밀번호 발송 API
+  // 임시 비밀번호 메일 발송 API
   @Post('send-password-reset-email')
   sendPasswordResetEmail(@Body() emailDto: EmailDto) {
     return this.userService.sendTemporaryPassword(emailDto);
   }
 
-  // 비밀번호 재설정 토큰 검증 API
-  @Get('reset-password/:token')
-  verifyPasswordToken(@Param('token') token: string) {
-    return this.userService.verifyPasswordToken(token);
-  }
-
   // 비밀번호 재설정 API
-  @Post('reset-password/:token')
+  @Post('reset-password/:userNo')
   resetPassword(
-    @Param('token') token: string,
+    @Param('userNo', new ParseIntPipe()) userNo: number,
+    @Body('tempPassword') tempPassword: string,
     @Body('newPassword') newPassword: string,
   ) {
-    return this.userService.resetPassword(token, newPassword);
+    return this.userService.resetPassword(userNo, tempPassword, newPassword);
   }
 
   // 로그인 권한 테스트 API
