@@ -50,7 +50,7 @@ export class UserController {
   // 비밀번호 재설정 메일 발송 API
   @Post('send-password-reset-email')
   sendPasswordResetEmail(@Body() emailDto: EmailDto) {
-    return this.userService.sendPasswordResetEmail(emailDto);
+    return this.userService.sendTemporaryPassword(emailDto);
   }
 
   // 비밀번호 재설정 토큰 검증 API

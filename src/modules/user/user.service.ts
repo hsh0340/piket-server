@@ -1,7 +1,7 @@
 import { randomBytes } from 'crypto';
 import { Inject, Injectable } from '@nestjs/common';
 import { EmailJoinRequestDto } from '@src/modules/user/dto/email-join-request.dto';
-import { PrismaService } from '@src/modules/prisma/prisma.service';
+
 import { EmailLoginRequestDto } from '@src/modules/user/dto/email-login-request.dto';
 import { AuthService } from '@src/modules/auth/services/auth.service';
 import { SuccessResponse } from '@src/common/interfaces/response.interface';
@@ -16,6 +16,7 @@ import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { MailerService } from '@nestjs-modules/mailer';
 import { CellPhoneDto } from '@src/modules/user/dto/cell-phone.dto';
 import { EmailDto } from '@src/modules/user/dto/email.dto';
+import { PrismaService } from '@src/modules/prisma/prisma.service';
 
 @Injectable()
 export class UserService {
@@ -262,6 +263,50 @@ export class UserService {
       to: user.email,
       subject: '비밀번호 초기화 이메일입니다.',
       html: `비밀번호 초기화를 위해서는 아래의 URL을 클릭하여 주세요. http://example/reset-password/${passwordResetToken}`,
+    });
+
+    const response: SuccessResponse<string> = {
+      isSuccess: true,
+      code: '1000',
+      message: '요청에 성공하였습니다.',
+      result: '이메일 발송에 성공하였습니다.',
+    };
+
+    return response;
+  }
+
+  async sendTemporaryPassword(emailDto: EmailDto) {
+    // 1. 무작위 8자 임시 비밀번호 생성
+    const temporaryPassword = randomBytes(8).toString('base64url');
+
+    // 2. 비밀번호 업데이트
+    const user = await this.getUserByEmail(emailDto.email);
+    const userAuth = await this.prismaService.userAuthentication.findFirst({
+      where: {
+        userNo: user.no,
+      },
+    });
+
+    await this.prismaService.userAuthentication.update({
+      where: {
+        cellPhone: userAuth.cellPhone,
+      },
+      data: {
+        password: temporaryPassword,
+      },
+    });
+
+    // 3. 임시비밀번호, 비밀번호 재설정 페이지로 이동하는 링크가 담긴 메일 발송
+    await this.mailerService.sendMail({
+      from: 'hsh0340@naver.com',
+      to: user.email,
+      subject: '[피켓] 비밀번호가 재설정되었습니다.',
+      template: 'public/hi.html',
+      html: `
+        <h1>임시비밀번호</h1>
+        : ${temporaryPassword} 
+        비밀번호 초기화를 위해서는 아래의 URL을 클릭하여 주세요. http://example/reset-password/${user.no}
+      `,
     });
 
     const response: SuccessResponse<string> = {
