@@ -298,8 +298,9 @@ export class UserService {
       template: 'public/hi.html',
       html: `
         <h1>임시비밀번호</h1>
-        : ${tempPassword} 
-        비밀번호 초기화를 위해서는 아래의 URL을 클릭하여 주세요. http://example/reset-password/${user.no}
+        ${tempPassword}<br> <button>비밀번호 복사</button><br>
+        비밀번호 재설정을 위해서는 아래의 URL을 클릭하여 주세요. http://example/reset-password/${user.no}
+        
       `,
     });
 
