@@ -12,16 +12,6 @@ import { MailerModule } from '@nestjs-modules/mailer';
   imports: [
     AuthModule,
     PrismaModule,
-    CacheModule.registerAsync({
-      useFactory: (configService: ConfigService) => ({
-        store: redisStore,
-        host: configService.get<string>('CACHE_HOST'),
-        // host: '127.0.0.1',
-        port: configService.get<number>('CACHE_PORT'),
-        ttl: 100000,
-      }),
-      inject: [ConfigService],
-    }),
     MailerModule.forRootAsync({
       useFactory: (configService: ConfigService) => ({
         transport: {

@@ -26,6 +26,7 @@ import * as redisStore from 'cache-manager-ioredis';
         ttl: 100000,
       }),
       inject: [ConfigService],
+      isGlobal: true,
     }),
     AuthModule,
     UserModule,
