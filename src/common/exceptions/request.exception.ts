@@ -36,3 +36,23 @@ export class PasswordMismatchException extends BaseException {
     this.message = '이메일과 비밀번호가 일치하지 않습니다.';
   }
 }
+
+export class PasswordNotUpdatedException extends BaseException {
+  constructor() {
+    super(
+      RequestExceptionCodeEnum.PasswordNotUpdated,
+      HttpStatus.INTERNAL_SERVER_ERROR,
+    );
+    this.message = '이메일과 비밀번호가 일치하지 않습니다.';
+  }
+}
+
+export class MailNotSentException extends BaseException {
+  constructor() {
+    super(
+      RequestExceptionCodeEnum.MailNotSent,
+      HttpStatus.INTERNAL_SERVER_ERROR,
+    );
+    this.message = '메일이 전송되지 않았습니다.';
+  }
+}

@@ -6,11 +6,12 @@ import { EmailLoginRequestDto } from '@src/modules/user/dto/email-login-request.
 import { AuthService } from '@src/modules/auth/services/auth.service';
 import { SuccessResponse } from '@src/common/interfaces/response.interface';
 import {
-  EmailExistException,
+  EmailExistException, MailNotSentException,
   PasswordMismatchException,
+  PasswordNotUpdatedException,
   PhoneExistException,
-  UserNotFoundException,
-} from '@src/common/exceptions/request.exception';
+  UserNotFoundException
+} from "@src/common/exceptions/request.exception";
 import { FindEmailRequestDto } from '@src/modules/user/dto/find-email-request.dto';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { MailerService } from '@nestjs-modules/mailer';
@@ -280,29 +281,41 @@ export class UserService {
     const tempPassword = this.generateRandomPassword();
     // 2. 비밀번호 업데이트
     const user = await this.getUserByEmail(emailDto.email);
+    if (!user) {
+      throw new UserNotFoundException();
+    }
 
-    await this.prismaService.userAuthentication.updateMany({
-      where: {
-        userNo: user.no,
-      },
-      data: {
-        password: tempPassword,
-      },
-    });
+    const passwordUpdateQuery =
+      await this.prismaService.userAuthentication.updateMany({
+        where: {
+          userNo: user.no,
+        },
+        data: {
+          password: tempPassword,
+        },
+      });
 
-    // 3. 임시비밀번호, 비밀번호 재설정 페이지로 이동하는 링크가 담긴 메일 발송
-    await this.mailerService.sendMail({
-      from: 'hsh0340@naver.com',
-      to: user.email,
-      subject: '[피켓] 비밀번호가 재설정되었습니다.',
-      template: 'public/hi.html',
-      html: `
+    if (passwordUpdateQuery.count === 0) {
+      throw new PasswordNotUpdatedException();
+    }
+
+    try {
+      // 3. 임시비밀번호, 비밀번호 재설정 페이지로 이동하는 링크가 담긴 메일 발송
+      await this.mailerService.sendMail({
+        from: 'hsh0340@naver.com',
+        to: user.email,
+        subject: '[피켓] 비밀번호가 재설정되었습니다.',
+        template: 'public/hi.html',
+        html: `
         <h1>임시비밀번호</h1>
         ${tempPassword}<br> <button>비밀번호 복사</button><br>
         비밀번호 재설정을 위해서는 아래의 URL을 클릭하여 주세요. http://example/reset-password/${user.no}
         
       `,
-    });
+      });
+    } catch (err) {
+      throw new MailNotSentException();
+    }
 
     const response: SuccessResponse<string> = {
       isSuccess: true,

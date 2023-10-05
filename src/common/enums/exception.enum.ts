@@ -10,6 +10,10 @@ export enum RequestExceptionCodeEnum {
   UserNotFound = '3002',
   // 비밀번호가 일치하지 않습니다.
   PasswordMismatch = '3003',
+  // 비밀번호가 업데이트 되지 않았습니다.
+  PasswordNotUpdated = '3004',
+  // 메일이 전송되지 않았습니다.
+  MailNotSent = '3005',
 }
 
 export enum UncatchedExceptionCodeEnum {
