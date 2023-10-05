@@ -6,12 +6,13 @@ import { EmailLoginRequestDto } from '@src/modules/user/dto/email-login-request.
 import { AuthService } from '@src/modules/auth/services/auth.service';
 import { SuccessResponse } from '@src/common/interfaces/response.interface';
 import {
-  EmailExistException, MailNotSentException,
+  EmailExistException,
+  MailNotSentException,
   PasswordMismatchException,
   PasswordNotUpdatedException,
   PhoneExistException,
-  UserNotFoundException
-} from "@src/common/exceptions/request.exception";
+  UserNotFoundException,
+} from '@src/common/exceptions/request.exception';
 import { FindEmailRequestDto } from '@src/modules/user/dto/find-email-request.dto';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { MailerService } from '@nestjs-modules/mailer';
@@ -309,7 +310,7 @@ export class UserService {
         html: `
         <h1>임시비밀번호</h1>
         ${tempPassword}<br> <button>비밀번호 복사</button><br>
-        비밀번호 재설정을 위해서는 아래의 URL을 클릭하여 주세요. http://example/reset-password/${user.no}
+        비밀번호 재설정을 위해서는 아래의 URL을 클릭하여 주세요. http://piket-fe.s3-website.ap-northeast-2.amazonaws.com/find_pw/${user.no}
         
       `,
       });
