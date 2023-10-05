@@ -237,6 +237,10 @@ export class UserService {
     return user;
   }
 
+  /**\
+   * @deprecated
+   * 비밀번호 재설정 방식이 바뀌면서 삭제 될 예정
+   */
   async sendPasswordResetEmail(emailDto: EmailDto) {
     const { email } = emailDto;
     const user = await this.getUserByEmail(email);
