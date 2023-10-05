@@ -3,9 +3,7 @@ import { UserController } from '@src/modules/user/user.controller';
 import { UserService } from '@src/modules/user/user.service';
 import { PrismaModule } from '@src/modules/prisma/prisma.module';
 import { AuthModule } from '@src/modules/auth/auth.module';
-import { CacheModule } from '@nestjs/cache-manager';
 import { ConfigService } from '@nestjs/config';
-import * as redisStore from 'cache-manager-ioredis';
 import { MailerModule } from '@nestjs-modules/mailer';
 
 @Module({
