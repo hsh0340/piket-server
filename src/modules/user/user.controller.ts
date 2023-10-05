@@ -56,9 +56,9 @@ export class UserController {
   }
 
   // 임시 비밀번호 메일 발송 API
-  @Post('send-password-reset-email')
-  sendPasswordResetEmail(@Body() emailDto: EmailDto) {
-    return this.userService.sendTemporaryPassword(emailDto);
+  @Post('send-temp-password-email')
+  sendTempPasswordEmail(@Body() emailDto: EmailDto) {
+    return this.userService.sendTempPasswordEmail(emailDto);
   }
 
   // 비밀번호 재설정 API

@@ -275,7 +275,7 @@ export class UserService {
     return response;
   }
 
-  async sendTemporaryPassword(emailDto: EmailDto) {
+  async sendTempPasswordEmail(emailDto: EmailDto) {
     // 1. 무작위 8자 임시 비밀번호 생성
     const tempPassword = this.generateRandomPassword();
     // 2. 비밀번호 업데이트
