@@ -277,8 +277,8 @@ export class UserService {
 
   async sendTemporaryPassword(emailDto: EmailDto) {
     // 1. 무작위 8자 임시 비밀번호 생성
-    const temporaryPassword = randomBytes(8).toString('base64url');
-
+    // const temporaryPassword = randomBytes(8).toString('base64url');
+    const tempPassword = this.generateRandomPassword();
     // 2. 비밀번호 업데이트
     const user = await this.getUserByEmail(emailDto.email);
     const userAuth = await this.prismaService.userAuthentication.findFirst({
@@ -292,7 +292,7 @@ export class UserService {
         cellPhone: userAuth.cellPhone,
       },
       data: {
-        password: temporaryPassword,
+        password: tempPassword,
       },
     });
 
@@ -304,7 +304,7 @@ export class UserService {
       template: 'public/hi.html',
       html: `
         <h1>임시비밀번호</h1>
-        : ${temporaryPassword} 
+        : ${tempPassword} 
         비밀번호 초기화를 위해서는 아래의 URL을 클릭하여 주세요. http://example/reset-password/${user.no}
       `,
     });
@@ -321,6 +321,61 @@ export class UserService {
 
   verifyPasswordToken(token: string) {
     // 토큰 유효시간 검증
+  }
+
+  generateRandomPassword() {
+    const lowercaseChars = 'abcdefghijklmnopqrstuvwxyz';
+    const uppercaseChars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    const numericChars = '0123456789';
+    const specialChars = '!@#$%^&*()-_=+[]{}|;:,.<>?';
+
+    // 각 카테고리에서 무작위 문자 선택
+    const randomLowercaseChar = this.getRandomChar(lowercaseChars);
+    const randomUppercaseChar = this.getRandomChar(uppercaseChars);
+    const randomNumericChar = this.getRandomChar(numericChars);
+    const randomSpecialChar = this.getRandomChar(specialChars);
+
+    // 나머지 글자 생성
+    const remainingChars = this.getRandomChars(
+      lowercaseChars + uppercaseChars + numericChars + specialChars,
+      4,
+    );
+
+    // 모든 문자 결합
+    const passwordChars =
+      randomLowercaseChar +
+      randomUppercaseChar +
+      randomNumericChar +
+      randomSpecialChar +
+      remainingChars;
+
+    // 문자 무작위로 섞기
+    const passwordArray = passwordChars.split('');
+    for (let i = passwordArray.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [passwordArray[i], passwordArray[j]] = [
+        passwordArray[j],
+        passwordArray[i],
+      ];
+    }
+
+    // 배열을 문자열로 변환
+    const randomPassword = passwordArray.join('');
+
+    return randomPassword;
+  }
+
+  getRandomChar(characters) {
+    const randomIndex = Math.floor(Math.random() * characters.length);
+    return characters[randomIndex];
+  }
+
+  getRandomChars(characters, count) {
+    let result = '';
+    for (let i = 0; i < count; i++) {
+      result += this.getRandomChar(characters);
+    }
+    return result;
   }
 
   async resetPassword(userNo: number, tempPassword, newPassword: string) {
