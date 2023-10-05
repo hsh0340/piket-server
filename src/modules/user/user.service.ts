@@ -385,9 +385,6 @@ export class UserService {
       },
     });
 
-    console.log(userAuth.password);
-    console.log(tempPassword);
-
     if (userAuth.password !== tempPassword) {
       throw new BadRequestException('임시 비밀번호가 틀렸습니다.');
     }
