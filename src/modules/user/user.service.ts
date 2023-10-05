@@ -277,19 +277,13 @@ export class UserService {
 
   async sendTemporaryPassword(emailDto: EmailDto) {
     // 1. 무작위 8자 임시 비밀번호 생성
-    // const temporaryPassword = randomBytes(8).toString('base64url');
     const tempPassword = this.generateRandomPassword();
     // 2. 비밀번호 업데이트
     const user = await this.getUserByEmail(emailDto.email);
-    const userAuth = await this.prismaService.userAuthentication.findFirst({
+
+    await this.prismaService.userAuthentication.updateMany({
       where: {
         userNo: user.no,
-      },
-    });
-
-    await this.prismaService.userAuthentication.update({
-      where: {
-        cellPhone: userAuth.cellPhone,
       },
       data: {
         password: tempPassword,
