@@ -43,7 +43,7 @@ export class PasswordNotUpdatedException extends BaseException {
       RequestExceptionCodeEnum.PasswordNotUpdated,
       HttpStatus.INTERNAL_SERVER_ERROR,
     );
-    this.message = '이메일과 비밀번호가 일치하지 않습니다.';
+    this.message = '비밀번호가 업데이트 되지 않았습니다.';
   }
 }
 
@@ -54,5 +54,22 @@ export class MailNotSentException extends BaseException {
       HttpStatus.INTERNAL_SERVER_ERROR,
     );
     this.message = '메일이 전송되지 않았습니다.';
+  }
+}
+
+export class UserNoNotFoundException extends BaseException {
+  constructor() {
+    super(RequestExceptionCodeEnum.UserNoNotFound, HttpStatus.BAD_REQUEST);
+    this.message = '존재하지 않는 유저 번호입니다.';
+  }
+}
+
+export class TempPasswordIncorrectException extends BaseException {
+  constructor() {
+    super(
+      RequestExceptionCodeEnum.TempPasswordIncorrect,
+      HttpStatus.BAD_REQUEST,
+    );
+    this.message = '임시 비밀번호가 틀렸습니다.';
   }
 }

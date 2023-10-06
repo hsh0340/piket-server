@@ -14,6 +14,10 @@ export enum RequestExceptionCodeEnum {
   PasswordNotUpdated = '3004',
   // 메일이 전송되지 않았습니다.
   MailNotSent = '3005',
+  // 존재하지 않는 유저 번호입니다.
+  UserNoNotFound = '3006',
+  // 임시 비밀번호가 틀렸습니다.
+  TempPasswordIncorrect = '3007',
 }
 
 export enum UncatchedExceptionCodeEnum {

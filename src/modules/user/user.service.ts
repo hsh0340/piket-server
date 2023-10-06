@@ -11,6 +11,8 @@ import {
   PasswordMismatchException,
   PasswordNotUpdatedException,
   PhoneExistException,
+  TempPasswordIncorrectException,
+  UserNoNotFoundException,
   UserNotFoundException,
 } from '@src/common/exceptions/request.exception';
 import { FindEmailRequestDto } from '@src/modules/user/dto/find-email-request.dto';
@@ -286,19 +288,7 @@ export class UserService {
       throw new UserNotFoundException();
     }
 
-    const passwordUpdateQuery =
-      await this.prismaService.userAuthentication.updateMany({
-        where: {
-          userNo: user.no,
-        },
-        data: {
-          password: tempPassword,
-        },
-      });
-
-    if (passwordUpdateQuery.count === 0) {
-      throw new PasswordNotUpdatedException();
-    }
+    await this.updatePassword(user.no, tempPassword);
 
     try {
       // 3. 임시비밀번호, 비밀번호 재설정 페이지로 이동하는 링크가 담긴 메일 발송
@@ -387,6 +377,22 @@ export class UserService {
     return result;
   }
 
+  async updatePassword(userNo: number, password: string) {
+    const passwordUpdateQuery =
+      await this.prismaService.userAuthentication.updateMany({
+        where: {
+          userNo,
+        },
+        data: {
+          password,
+        },
+      });
+
+    if (passwordUpdateQuery.count === 0) {
+      throw new PasswordNotUpdatedException();
+    }
+  }
+
   async resetPassword(userNo: number, tempPassword, newPassword: string) {
     const userAuth = await this.prismaService.userAuthentication.findFirst({
       where: {
@@ -394,18 +400,15 @@ export class UserService {
       },
     });
 
-    if (userAuth.password !== tempPassword) {
-      throw new BadRequestException('임시 비밀번호가 틀렸습니다.');
+    if (!userAuth) {
+      throw new UserNoNotFoundException();
     }
 
-    await this.prismaService.userAuthentication.updateMany({
-      where: {
-        userNo,
-      },
-      data: {
-        password: newPassword,
-      },
-    });
+    if (userAuth.password !== tempPassword) {
+      throw new TempPasswordIncorrectException();
+    }
+
+    await this.updatePassword(userNo, newPassword);
 
     const response: SuccessResponse<string> = {
       isSuccess: true,
