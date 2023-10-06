@@ -25,4 +25,15 @@ export class BrandService {
 
     return brand;
   }
+
+  updateBrand(brandId: number, updateBrandRequestDto) {
+    const brandUpdateQuery = this.prismaService.brand.update({
+      where: {
+        id: brandId,
+      },
+      data: updateBrandRequestDto,
+    });
+
+    return brandUpdateQuery;
+  }
 }
