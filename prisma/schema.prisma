@@ -15,6 +15,7 @@ model User {
   createdAt          DateTime             @default(now()) @map("created_at") @db.DateTime(0)
   updatedAt          DateTime             @default(now()) @map("updated_at") @db.DateTime(0)
   deletedAt          DateTime?            @map("deleted_at") @db.DateTime(0)
+  brand              Brand[]
   userAuthentication UserAuthentication[]
 
   @@map("user")
@@ -39,4 +40,30 @@ model UserAuthentication {
 
   @@index([userNo], map: "user_authentication_user_no_FK")
   @@map("user_authentication")
+}
+
+model Brand {
+  id            Int           @id @default(autoincrement()) @db.UnsignedInt
+  advertiserNo  Int           @map("advertiser_no") @db.UnsignedInt
+  categoryId    Int           @map("category_id") @db.UnsignedInt
+  name          String        @db.VarChar(20)
+  description   String?       @db.VarChar(60)
+  createdAt     DateTime      @default(now()) @map("created_at") @db.DateTime(0)
+  updatedAt     DateTime      @default(now()) @map("updated_at") @db.DateTime(0)
+  user          User          @relation(fields: [advertiserNo], references: [no], onDelete: NoAction, onUpdate: NoAction, map: "brand_advertiser_no_FK")
+  brandCategory BrandCategory @relation(fields: [categoryId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "brand_category_id_FK")
+
+  @@unique([categoryId, name], map: "category_id")
+  @@index([advertiserNo], map: "brand_advertiser_no_FK")
+  @@map("brand")
+}
+
+model BrandCategory {
+  id        Int      @id @default(autoincrement()) @db.UnsignedInt
+  name      String   @unique(map: "name") @db.VarChar(20)
+  createdAt DateTime @default(now()) @map("created_at") @db.DateTime(0)
+  updatedAt DateTime @default(now()) @map("updated_at") @db.DateTime(0)
+  brand     Brand[]
+
+  @@map("brand_category")
 }
