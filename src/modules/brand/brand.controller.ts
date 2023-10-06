@@ -11,7 +11,9 @@ export class BrandController {
 
   // 신규 브랜드 등록 API
   @Post()
-  createBrand(createBrandReqeustDto: CreateBrandRequestDto) {}
+  createBrand(createBrandRequestDto: CreateBrandRequestDto) {
+    return this.brandService.createBrand(createBrandRequestDto);
+  }
 
   // 브랜드 수정 API
   @Patch()
