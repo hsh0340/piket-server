@@ -9,6 +9,7 @@ import { AppService } from '@src/app.service';
 import { APP_PIPE } from '@nestjs/core';
 import { ValidationPipe } from '@src/common/pipes/validation.pipe';
 import { CacheModule } from '@nestjs/cache-manager';
+import { BrandModule } from '@src/modules/brand/brand.module';
 import * as redisStore from 'cache-manager-ioredis';
 
 @Module({
@@ -31,6 +32,7 @@ import * as redisStore from 'cache-manager-ioredis';
     AuthModule,
     UserModule,
     HealthModule,
+    BrandModule,
   ],
   controllers: [AppController],
   providers: [
