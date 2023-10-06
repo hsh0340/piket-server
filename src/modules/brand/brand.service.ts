@@ -26,8 +26,8 @@ export class BrandService {
     return brand;
   }
 
-  updateBrand(brandId: number, updateBrandRequestDto) {
-    const brandUpdateQuery = this.prismaService.brand.update({
+  async updateBrand(brandId: number, updateBrandRequestDto) {
+    const brandUpdateQuery = await this.prismaService.brand.update({
       where: {
         id: brandId,
       },
@@ -35,5 +35,15 @@ export class BrandService {
     });
 
     return brandUpdateQuery;
+  }
+
+  async deleteBrand(brandId: number) {
+    const brandDeleteQuery = await this.prismaService.brand.delete({
+      where: {
+        id: brandId,
+      },
+    });
+
+    return brandDeleteQuery;
   }
 }

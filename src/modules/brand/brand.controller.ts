@@ -37,6 +37,8 @@ export class BrandController {
   }
 
   // 브랜드 삭제 API
-  @Delete()
-  deleteBrand() {}
+  @Delete(':brandId')
+  deleteBrand(@Param('brandId', new ParseIntPipe()) brandId: number) {
+    return this.brandService.deleteBrand(brandId);
+  }
 }
