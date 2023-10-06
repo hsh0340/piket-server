@@ -1,5 +1,6 @@
 import { Controller, Delete, Get, Patch, Post } from '@nestjs/common';
 import { BrandService } from '@src/modules/brand/brand.service';
+import { CreateBrandRequestDto } from '@src/modules/brand/dto/create-brand-request.dto';
 
 @Controller('brand')
 export class BrandController {
@@ -10,7 +11,7 @@ export class BrandController {
 
   // 신규 브랜드 등록 API
   @Post()
-  createBrand() {}
+  createBrand(createBrandReqeustDto: CreateBrandRequestDto) {}
 
   // 브랜드 수정 API
   @Patch()
