@@ -6,11 +6,11 @@ import { UserModule } from '@src/modules/user/user.module';
 import { HealthModule } from '@src/modules/health/health.module';
 import { AppController } from '@src/app.controller';
 import { AppService } from '@src/app.service';
-import { APP_PIPE } from '@nestjs/core';
 import { ValidationPipe } from '@src/common/pipes/validation.pipe';
 import { CacheModule } from '@nestjs/cache-manager';
 import { BrandModule } from '@src/modules/brand/brand.module';
 import * as redisStore from 'cache-manager-ioredis';
+import { APP_PIPE } from "@nestjs/core";
 
 @Module({
   imports: [
