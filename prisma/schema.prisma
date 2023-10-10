@@ -11,7 +11,7 @@ model User {
   no                 Int                  @id @default(autoincrement()) @db.UnsignedInt
   email              String               @unique(map: "email") @db.VarChar(50)
   loginType          Int                  @map("login_type") @db.UnsignedTinyInt
-  role               Int                  @default(0) @db.UnsignedTinyInt
+  roleType           Int                  @default(0) @map("role_type") @db.UnsignedTinyInt
   createdAt          DateTime             @default(now()) @map("created_at") @db.DateTime(0)
   updatedAt          DateTime             @default(now()) @map("updated_at") @db.DateTime(0)
   deletedAt          DateTime?            @map("deleted_at") @db.DateTime(0)
@@ -66,4 +66,10 @@ model BrandCategory {
   brand     Brand[]
 
   @@map("brand_category")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model test {
+  id    Int @id @default(autoincrement())
+  agree Int
 }
