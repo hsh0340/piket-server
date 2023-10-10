@@ -17,7 +17,7 @@ import { EmailDto } from '@src/modules/user/dto/email.dto';
 import { RolesGuard } from '@src/modules/auth/guards/roles.guard';
 import { Roles } from '@src/modules/auth/decorators/roles.decorator';
 import { RoleType } from '@src/modules/auth/types/role-type';
-import { User } from "@src/modules/auth/decorators/user.decorator";
+import { User } from '@src/modules/auth/decorators/user.decorator';
 
 @Controller('users')
 export class UserController {
