@@ -18,15 +18,11 @@ export class BrandService {
   }
 
   async createBrand(advertiser, createBrandRequestDto: CreateBrandRequestDto) {
-    const { categoryId, name, description } = createBrandRequestDto;
-
     try {
       await this.prismaService.brand.create({
         data: {
           advertiserNo: advertiser.no,
-          categoryId,
-          name,
-          description,
+          ...createBrandRequestDto,
         },
       });
 
