@@ -18,12 +18,12 @@ import { RolesGuard } from '@src/modules/auth/guards/roles.guard';
 import { Roles } from '@src/modules/auth/decorators/roles.decorator';
 import { RoleType } from '@src/modules/auth/types/role-type';
 import { User } from '@src/modules/auth/decorators/user.decorator';
-import { SerializationInterceptor } from '@src/common/interceptors/response-serialization.interceptor';
+import { ResponseSerializationInterceptor } from '@src/common/interceptors/response-serialization.interceptor';
 
 @UseGuards(AuthGuard('jwt'), RolesGuard)
 @Roles(RoleType.ADVERTISER)
 @Controller('brands')
-@UseInterceptors(SerializationInterceptor)
+@UseInterceptors(ResponseSerializationInterceptor)
 export class BrandController {
   constructor(private readonly brandService: BrandService) {}
   // 브랜드 목록 API

@@ -8,7 +8,7 @@ import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
 @Injectable()
-export class SerializationInterceptor implements NestInterceptor {
+export class ResponseSerializationInterceptor implements NestInterceptor {
   intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
     // 컨트롤러로부터 받은 응답 데이터를 가로채고 조작합니다.
     return next.handle().pipe(
