@@ -41,17 +41,17 @@ export class EmailJoinRequestDto {
   @IsNotEmpty()
   @IsInt()
   @Equals(1)
-  tosAgree: Agreement.accept;
+  tosAgree: Agreement.ACCEPT;
 
   @IsNotEmpty()
   @IsInt()
   @Equals(1)
-  personalInfoAgree: Agreement.accept;
+  personalInfoAgree: Agreement.ACCEPT;
 
   @IsNotEmpty()
   @IsInt()
   @Equals(1)
-  ageLimitAgree: Agreement.accept;
+  ageLimitAgree: Agreement.ACCEPT;
 
   @IsNotEmpty()
   @IsInt()
