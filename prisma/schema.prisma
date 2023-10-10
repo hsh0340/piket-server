@@ -53,13 +53,13 @@ model Brand {
   user          User          @relation(fields: [advertiserNo], references: [no], onDelete: NoAction, onUpdate: NoAction, map: "brand_advertiser_no_FK")
   brandCategory BrandCategory @relation(fields: [categoryId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "brand_category_id_FK")
 
-  @@unique([categoryId, name], map: "category_id")
-  @@index([advertiserNo], map: "brand_advertiser_no_FK")
+  @@unique([advertiserNo, categoryId, name], map: "brand_ad_category_name")
+  @@index([categoryId], map: "brand_category_id_FK")
   @@map("brand")
 }
 
 model BrandCategory {
-  id        Int      @id @default(autoincrement()) @db.UnsignedInt
+  id        Int      @id @db.UnsignedInt
   name      String   @unique(map: "name") @db.VarChar(20)
   createdAt DateTime @default(now()) @map("created_at") @db.DateTime(0)
   updatedAt DateTime @default(now()) @map("updated_at") @db.DateTime(0)

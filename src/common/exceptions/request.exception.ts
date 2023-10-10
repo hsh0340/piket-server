@@ -73,3 +73,27 @@ export class TempPasswordIncorrectException extends BaseException {
     this.message = '임시 비밀번호가 틀렸습니다.';
   }
 }
+
+export class BrandExistsException extends BaseException {
+  constructor() {
+    super(RequestExceptionCodeEnum.BrandExists, HttpStatus.BAD_REQUEST);
+    this.message = '이미 존재하는 브랜드입니다.';
+  }
+}
+
+export class CategoryNotFoundException extends BaseException {
+  constructor() {
+    super(RequestExceptionCodeEnum.CategoryNotFound, HttpStatus.BAD_REQUEST);
+    this.message = '존재하지 않는 카테고리입니다.';
+  }
+}
+
+export class BrandNotCreatedException extends BaseException {
+  constructor() {
+    super(
+      RequestExceptionCodeEnum.BrandNotCreated,
+      HttpStatus.INTERNAL_SERVER_ERROR,
+    );
+    this.message = '브랜드가 생성되지 않았습니다.';
+  }
+}
