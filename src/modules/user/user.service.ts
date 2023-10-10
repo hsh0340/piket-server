@@ -163,6 +163,7 @@ export class UserService {
         accessToken,
         refreshToken,
         userNo: user.no,
+        userRoleType: user.roleType,
         userName: savedAuth.name,
       },
     };
