@@ -21,7 +21,6 @@ export class AuthService {
       secret: this.configService.get<string>('JWT_SECRET_KEY'),
       expiresIn: this.configService.get<string>('REFRESH_TOKEN_EXPIRATION'),
     });
-    console.log(refreshToken);
     return refreshToken;
   }
 
