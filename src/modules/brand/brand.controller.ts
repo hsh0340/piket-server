@@ -12,7 +12,7 @@ import { BrandService } from '@src/modules/brand/brand.service';
 import { CreateBrandRequestDto } from '@src/modules/brand/dto/create-brand-request.dto';
 import { UpdateBrandRequestDto } from '@src/modules/brand/dto/update-brand-request.dto';
 
-@Controller('brand')
+@Controller('brands')
 export class BrandController {
   constructor(private readonly brandService: BrandService) {}
   // 브랜드 목록 API
