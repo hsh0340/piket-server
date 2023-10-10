@@ -41,8 +41,6 @@ export class BrandService {
     } catch (err) {
       if (err.code === 'P2002') {
         throw new BrandExistsException();
-      } else if (err.code === 'P2003') {
-        throw new CategoryNotFoundException();
       } else {
         throw new BrandNotCreatedException();
       }
