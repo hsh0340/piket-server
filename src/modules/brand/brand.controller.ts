@@ -7,11 +7,18 @@ import {
   ParseIntPipe,
   Patch,
   Post,
+  UseGuards,
 } from '@nestjs/common';
 import { BrandService } from '@src/modules/brand/brand.service';
 import { CreateBrandRequestDto } from '@src/modules/brand/dto/create-brand-request.dto';
 import { UpdateBrandRequestDto } from '@src/modules/brand/dto/update-brand-request.dto';
+import { AuthGuard } from '@nestjs/passport';
+import { RolesGuard } from '@src/modules/auth/guards/roles.guard';
+import { Roles } from '@src/modules/auth/decorators/roles.decorator';
+import { RoleType } from '@src/modules/auth/types/role-type';
 
+@UseGuards(AuthGuard('jwt'), RolesGuard)
+@Roles(RoleType.ADVERTISER)
 @Controller('brands')
 export class BrandController {
   constructor(private readonly brandService: BrandService) {}
