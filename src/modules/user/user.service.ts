@@ -63,7 +63,7 @@ export class UserService {
         data: {
           email,
           loginType: 0,
-          role: 0,
+          roleType: 0,
         },
       });
 

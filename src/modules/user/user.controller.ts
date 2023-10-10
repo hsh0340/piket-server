@@ -16,7 +16,7 @@ import { CellPhoneDto } from '@src/modules/user/dto/cell-phone.dto';
 import { EmailDto } from '@src/modules/user/dto/email.dto';
 import { RolesGuard } from '@src/modules/auth/guards/roles.guard';
 import { Roles } from '@src/modules/auth/decorators/roles.decorator';
-import { Role } from '@src/modules/auth/types/role-type';
+import { RoleType } from '@src/modules/auth/types/role-type';
 
 @Controller('users')
 export class UserController {
@@ -76,7 +76,7 @@ export class UserController {
 
   // 로그인 권한 테스트 API
   @UseGuards(AuthGuard('jwt'), RolesGuard)
-  @Roles(Role.UNDEFINED)
+  @Roles(RoleType.UNDEFINED)
   @Get('login-test')
   loginAuthTest() {
     return '로그인 된 상태입니다.';
