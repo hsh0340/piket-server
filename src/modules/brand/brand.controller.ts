@@ -16,6 +16,7 @@ import { AuthGuard } from '@nestjs/passport';
 import { RolesGuard } from '@src/modules/auth/guards/roles.guard';
 import { Roles } from '@src/modules/auth/decorators/roles.decorator';
 import { RoleType } from '@src/modules/auth/types/role-type';
+import { User } from '@src/modules/auth/decorators/user.decorator';
 
 @UseGuards(AuthGuard('jwt'), RolesGuard)
 @Roles(RoleType.ADVERTISER)
@@ -30,8 +31,11 @@ export class BrandController {
 
   // 신규 브랜드 등록 API
   @Post()
-  createBrand(@Body() createBrandRequestDto: CreateBrandRequestDto) {
-    return this.brandService.createBrand(createBrandRequestDto);
+  createBrand(
+    @User() advertiser,
+    @Body() createBrandRequestDto: CreateBrandRequestDto,
+  ) {
+    return this.brandService.createBrand(advertiser, createBrandRequestDto);
   }
 
   // 브랜드 수정 API

@@ -17,6 +17,7 @@ import { EmailDto } from '@src/modules/user/dto/email.dto';
 import { RolesGuard } from '@src/modules/auth/guards/roles.guard';
 import { Roles } from '@src/modules/auth/decorators/roles.decorator';
 import { RoleType } from '@src/modules/auth/types/role-type';
+import { User } from "@src/modules/auth/decorators/user.decorator";
 
 @Controller('users')
 export class UserController {
@@ -78,8 +79,8 @@ export class UserController {
   @UseGuards(AuthGuard('jwt'), RolesGuard)
   @Roles(RoleType.UNDEFINED)
   @Get('login-test')
-  loginAuthTest() {
-    return '로그인 된 상태입니다.';
+  loginAuthTest(@User() user) {
+    return user;
   }
 
   // 카카오로그인 API

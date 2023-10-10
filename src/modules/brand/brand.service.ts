@@ -11,12 +11,13 @@ export class BrandService {
     return brands;
   }
 
-  async createBrand(createBrandRequestDto: CreateBrandRequestDto) {
+  async createBrand(advertiser, createBrandRequestDto: CreateBrandRequestDto) {
+    console.log(advertiser);
     const { categoryId, name, description } = createBrandRequestDto;
 
     const brand = await this.prismaService.brand.create({
       data: {
-        advertiserNo: 1, // 이부분은 나중에 유저에게 받아온 고유번호 값으로 변경
+        advertiserNo: advertiser.no, // 이부분은 나중에 유저에게 받아온 고유번호 값으로 변경
         categoryId,
         name,
         description,
