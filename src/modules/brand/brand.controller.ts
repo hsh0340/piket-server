@@ -8,6 +8,7 @@ import {
   Patch,
   Post,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
 import { BrandService } from '@src/modules/brand/brand.service';
 import { CreateBrandRequestDto } from '@src/modules/brand/dto/create-brand-request.dto';
@@ -17,10 +18,12 @@ import { RolesGuard } from '@src/modules/auth/guards/roles.guard';
 import { Roles } from '@src/modules/auth/decorators/roles.decorator';
 import { RoleType } from '@src/modules/auth/types/role-type';
 import { User } from '@src/modules/auth/decorators/user.decorator';
+import { SerializationInterceptor } from '@src/common/interceptors/response-serialization.interceptor';
 
 @UseGuards(AuthGuard('jwt'), RolesGuard)
 @Roles(RoleType.ADVERTISER)
 @Controller('brands')
+@UseInterceptors(SerializationInterceptor)
 export class BrandController {
   constructor(private readonly brandService: BrandService) {}
   // 브랜드 목록 API
@@ -31,11 +34,13 @@ export class BrandController {
 
   // 신규 브랜드 등록 API
   @Post()
-  createBrand(
+  async createBrand(
     @User() advertiser,
     @Body() createBrandRequestDto: CreateBrandRequestDto,
-  ) {
-    return this.brandService.createBrand(advertiser, createBrandRequestDto);
+  ): Promise<string> {
+    await this.brandService.createBrand(advertiser, createBrandRequestDto);
+
+    return '브랜드가 생성되었습니다.';
   }
 
   // 브랜드 수정 API

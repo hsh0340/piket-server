@@ -17,7 +17,10 @@ export class BrandService {
     return brands;
   }
 
-  async createBrand(advertiser, createBrandRequestDto: CreateBrandRequestDto) {
+  async createBrand(
+    advertiser,
+    createBrandRequestDto: CreateBrandRequestDto,
+  ): Promise<void> {
     try {
       await this.prismaService.brand.create({
         data: {
@@ -25,15 +28,6 @@ export class BrandService {
           ...createBrandRequestDto,
         },
       });
-
-      const response: SuccessResponse<string> = {
-        isSuccess: true,
-        code: '1000',
-        message: '요청에 성공하였습니다.',
-        result: '브랜드가 생성되었습니다.',
-      };
-
-      return response;
     } catch (err) {
       if (err.code === 'P2002') {
         throw new BrandExistsException();
