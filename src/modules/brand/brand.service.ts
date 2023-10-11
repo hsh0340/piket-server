@@ -134,6 +134,9 @@ export class BrandService {
     }
   }
 
+  /**
+   * @todo 캠페인 등록 기능 구현하면서 함께 구현할 것
+   */
   async deleteBrand(brandId: number) {
     const brandDeleteQuery = await this.prismaService.brand.delete({
       where: {
