@@ -22,7 +22,7 @@ export enum RequestExceptionCodeEnum {
   BrandExists = '3010',
   // 존재하지 않는 카테고리입니다. : 3011
   CategoryNotFound = '3011',
-  // 브랜드가 생성되지 않았습니다. : 3012
+  // 브랜드가 생성에 실패하였습니다. : 3012
   BrandNotCreated = '3012',
   // 브랜드 목록 조회에 실패하였습니다. : 3013
   BrandsNotFound = '3013',

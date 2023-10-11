@@ -94,7 +94,7 @@ export class BrandNotCreatedException extends BaseException {
       RequestExceptionCodeEnum.BrandNotCreated,
       HttpStatus.INTERNAL_SERVER_ERROR,
     );
-    this.message = '브랜드가 생성되지 않았습니다.';
+    this.message = '브랜드 생성에 실패하였습니다.';
   }
 }
 
