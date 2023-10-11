@@ -26,6 +26,12 @@ export enum RequestExceptionCodeEnum {
   BrandNotCreated = '3012',
   // 브랜드 목록 조회에 실패하였습니다. : 3013
   BrandsNotFound = '3013',
+  // 브랜드가 존재하지 않습니다. : 3014
+  BrandNotExists = '3014',
+  // 업데이트된 브랜드 정보가 없습니다. : 3015
+  NoBrandInfoUpdated = '3015',
+  // 브랜드 업데이트에 실패하였습니다. : 3016
+  BrandNotUpdated = '3016',
 }
 
 export enum UncatchedExceptionCodeEnum {

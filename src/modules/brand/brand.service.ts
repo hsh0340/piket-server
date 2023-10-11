@@ -4,10 +4,14 @@ import { CreateBrandRequestDto } from '@src/modules/brand/dto/create-brand-reque
 import {
   BrandExistsException,
   BrandNotCreatedException,
+  BrandNotUpdatedException,
   BrandsNotFoundException,
+  BrandNotExistsException,
+  NoBrandInfoUpdatedException,
 } from '@src/common/exceptions/request.exception';
 import { UserEntity } from '@src/entity/user.entity';
 import { GetAllBrandsDto } from '@src/modules/brand/dto/get-all-brands.dto';
+import { UpdateBrandRequestDto } from '@src/modules/brand/dto/update-brand-request.dto';
 
 @Injectable()
 export class BrandService {
@@ -41,9 +45,9 @@ export class BrandService {
   }
 
   /**
-   * 브랜드 생성 메서드
+   * 브랜드 등록 메서드
    * @param advertiser 로그인 한 광고주 정보
-   * @param createBrandRequestDto 브랜드 생성 DTO
+   * @param createBrandRequestDto 브랜드 등록 DTO
    * @return void
    * @exception 브랜드가 이미 존재할 경우 BrandExistsException 을 반환합니다.
    * @exception 브랜드가 생성되지 않았을 경우 BrandNotCreatedException 을 반환합니다.
@@ -68,15 +72,50 @@ export class BrandService {
     }
   }
 
-  async updateBrand(brandId: number, updateBrandRequestDto) {
-    const brandUpdateQuery = await this.prismaService.brand.update({
+  async updateBrand(
+    advertiser: UserEntity,
+    brandId: number,
+    updateBrandRequestDto: UpdateBrandRequestDto,
+  ): Promise<void> {
+    /*
+     * update 하려는 브랜드가 로그인 한 광고주의 브랜드인지 확인하고, 아니라면 예외를 던집니다.
+     */
+    const savedBrand = await this.prismaService.brand.findUnique({
       where: {
+        advertiserNo: advertiser.no,
         id: brandId,
       },
-      data: updateBrandRequestDto,
     });
 
-    return brandUpdateQuery;
+    if (!savedBrand) {
+      throw new BrandNotExistsException();
+    }
+
+    /*
+     * 수정된 데이터가 존재하는지 확인하고, 존재하지 않는다면 예외를 던집니다.
+     */
+    const { categoryId, name, description } = updateBrandRequestDto;
+
+    if (
+      savedBrand.categoryId === categoryId &&
+      savedBrand.name === name &&
+      savedBrand.description === description
+    ) {
+      throw new NoBrandInfoUpdatedException();
+    }
+
+    try {
+      await this.prismaService.brand.update({
+        where: {
+          id: brandId,
+        },
+        data: updateBrandRequestDto,
+      });
+
+      return;
+    } catch (err) {
+      throw new BrandNotUpdatedException();
+    }
   }
 
   async deleteBrand(brandId: number) {

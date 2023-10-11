@@ -35,7 +35,7 @@ export class BrandController {
     return this.brandService.getAllBrands(advertiser);
   }
 
-  // 신규 브랜드 등록 API
+  // 브랜드 등록 API
   @Post()
   async createBrand(
     @User() advertiser: UserEntity,
@@ -48,11 +48,18 @@ export class BrandController {
 
   // 브랜드 수정 API
   @Patch(':brandId')
-  updateBrand(
+  async updateBrand(
+    @User() advertiser: UserEntity,
     @Param('brandId', new ParseIntPipe()) brandId: number,
     @Body() updateBrandRequestDto: UpdateBrandRequestDto,
-  ) {
-    return this.brandService.updateBrand(brandId, updateBrandRequestDto);
+  ): Promise<string> {
+    await this.brandService.updateBrand(
+      advertiser,
+      brandId,
+      updateBrandRequestDto,
+    );
+
+    return '브랜드가 수정되었습니다.';
   }
 
   // 브랜드 삭제 API

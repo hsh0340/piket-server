@@ -107,3 +107,27 @@ export class BrandsNotFoundException extends BaseException {
     this.message = '브랜드 목록 조회에 실패하였습니다.';
   }
 }
+
+export class BrandNotExistsException extends BaseException {
+  constructor() {
+    super(RequestExceptionCodeEnum.BrandNotExists, HttpStatus.BAD_REQUEST);
+    this.message = '브랜드가 존재하지 않습니다.';
+  }
+}
+
+export class NoBrandInfoUpdatedException extends BaseException {
+  constructor() {
+    super(RequestExceptionCodeEnum.NoBrandInfoUpdated, HttpStatus.BAD_REQUEST);
+    this.message = '업데이트된 브랜드 정보가 없습니다.';
+  }
+}
+
+export class BrandNotUpdatedException extends BaseException {
+  constructor() {
+    super(
+      RequestExceptionCodeEnum.BrandNotUpdated,
+      HttpStatus.INTERNAL_SERVER_ERROR,
+    );
+    this.message = '브랜드 업데이트에 실패하였습니다.';
+  }
+}
