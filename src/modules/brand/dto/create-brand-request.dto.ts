@@ -1,10 +1,7 @@
 import {
-  IsAlphanumeric,
-  IsAscii,
   IsEnum,
   IsNotEmpty,
   IsOptional,
-  IsString,
   Matches,
   MaxLength,
 } from 'class-validator';
