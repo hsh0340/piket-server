@@ -97,3 +97,13 @@ export class BrandNotCreatedException extends BaseException {
     this.message = '브랜드가 생성되지 않았습니다.';
   }
 }
+
+export class BrandsNotFoundException extends BaseException {
+  constructor() {
+    super(
+      RequestExceptionCodeEnum.BrandsNotFound,
+      HttpStatus.INTERNAL_SERVER_ERROR,
+    );
+    this.message = '브랜드 목록 조회에 실패하였습니다.';
+  }
+}

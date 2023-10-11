@@ -4,6 +4,7 @@ import { CreateBrandRequestDto } from '@src/modules/brand/dto/create-brand-reque
 import {
   BrandExistsException,
   BrandNotCreatedException,
+  BrandsNotFoundException,
   CategoryNotFoundException,
 } from '@src/common/exceptions/request.exception';
 import { UserEntity } from '@src/entity/user.entity';
@@ -14,22 +15,26 @@ export class BrandService {
   constructor(private readonly prismaService: PrismaService) {}
 
   async getAllBrands(advertiser: UserEntity): Promise<GetAllBrandsDto[]> {
-    const brands = await this.prismaService.brand.findMany({
-      select: {
-        id: true,
-        categoryId: true,
-        name: true,
-        description: true,
-      },
-      where: {
-        advertiserNo: advertiser.no,
-      },
-      orderBy: {
-        createdAt: 'desc',
-      },
-    });
+    try {
+      const brands = await this.prismaService.brand.findMany({
+        select: {
+          id: true,
+          categoryId: true,
+          name: true,
+          description: true,
+        },
+        where: {
+          advertiserNo: advertiser.no,
+        },
+        orderBy: {
+          createdAt: 'desc',
+        },
+      });
 
-    return brands;
+      return brands;
+    } catch (err) {
+      throw new BrandsNotFoundException();
+    }
   }
 
   /**
