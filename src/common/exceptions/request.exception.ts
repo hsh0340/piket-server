@@ -74,6 +74,16 @@ export class TempPasswordIncorrectException extends BaseException {
   }
 }
 
+export class UserNotCreatedException extends BaseException {
+  constructor() {
+    super(
+      RequestExceptionCodeEnum.UserNotCreated,
+      HttpStatus.INTERNAL_SERVER_ERROR,
+    );
+    this.message = '유저 생성에 실패하였습니다.';
+  }
+}
+
 export class BrandExistsException extends BaseException {
   constructor() {
     super(RequestExceptionCodeEnum.BrandExists, HttpStatus.BAD_REQUEST);

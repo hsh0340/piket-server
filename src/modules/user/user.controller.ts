@@ -6,6 +6,7 @@ import {
   ParseIntPipe,
   Post,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
 import { UserService } from '@src/modules/user/user.service';
 import { EmailJoinRequestDto } from '@src/modules/user/dto/email-join-request.dto';
@@ -18,15 +19,18 @@ import { RolesGuard } from '@src/modules/auth/guards/roles.guard';
 import { Roles } from '@src/modules/auth/decorators/roles.decorator';
 import { RoleType } from '@src/modules/auth/types/role-type';
 import { User } from '@src/modules/auth/decorators/user.decorator';
+import { ResponseSerializationInterceptor } from '@src/common/interceptors/response-serialization.interceptor';
 
+@UseInterceptors(ResponseSerializationInterceptor)
 @Controller('users')
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
-  // 회원가입 API
+  // 이메일 회원가입 API
   @Post('email-join')
   async emailJoin(@Body() emailJoinRequestDto: EmailJoinRequestDto) {
-    return await this.userService.emailJoin(emailJoinRequestDto);
+    const userNo = await this.userService.emailJoin(emailJoinRequestDto);
+    return { userNo };
   }
 
   // 전화번호 중복체크 API

@@ -1,5 +1,5 @@
 import { randomBytes } from 'crypto';
-import { BadRequestException, Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { EmailJoinRequestDto } from '@src/modules/user/dto/email-join-request.dto';
 
 import { EmailLoginRequestDto } from '@src/modules/user/dto/email-login-request.dto';
@@ -13,6 +13,7 @@ import {
   PhoneExistException,
   TempPasswordIncorrectException,
   UserNoNotFoundException,
+  UserNotCreatedException,
   UserNotFoundException,
 } from '@src/common/exceptions/request.exception';
 import { FindEmailRequestDto } from '@src/modules/user/dto/find-email-request.dto';
@@ -21,6 +22,7 @@ import { MailerService } from '@nestjs-modules/mailer';
 import { CellPhoneDto } from '@src/modules/user/dto/cell-phone.dto';
 import { EmailDto } from '@src/modules/user/dto/email.dto';
 import { PrismaService } from '@src/modules/prisma/prisma.service';
+import { UserEntity } from '@src/entity/user.entity';
 
 @Injectable()
 export class UserService {
@@ -32,66 +34,61 @@ export class UserService {
     private readonly mailerService: MailerService,
   ) {}
 
-  async emailJoin(emailJoinRequestDto: EmailJoinRequestDto) {
-    const {
-      cellPhone,
-      password,
-      email,
-      name,
-      sex,
-      tosAgree,
-      personalInfoAgree,
-      ageLimitAgree,
-      mailAgree,
-      notificationAgree,
-    } = emailJoinRequestDto;
+  /**
+   * 이메일 회원가입 메서드
+   * @param emailJoinRequestDto 이메일 회원가입 DTO
+   * @return 생성된 유저의 고유번호를 반환합니다.
+   * @exception 핸드폰 번호가 이미 존재할 경우 PhoneExistException 을 반환합니다.
+   * @exception 이메일이 이미 존재할 경우 EmailExistException 을 반환합니다.
+   * @exception 유저 생성에 실패할 경우 UserNotCreatedException 을 반환합니다.
+   */
+  async emailJoin(emailJoinRequestDto: EmailJoinRequestDto): Promise<number> {
+    const { cellPhone, email, ...rest } = emailJoinRequestDto;
+    let newUser: UserEntity; // db에 insert 된 유저를 리턴하기 위해 선언
 
-    const user = await this.prismaService.userAuthentication.findFirst({
-      where: {
-        cellPhone,
+    /*
+     * 핸드폰 번호를 기준으로 이미 존재하는 유저인지 확인합니다.
+     */
+    const existingUser = await this.prismaService.userAuthentication.findUnique(
+      {
+        where: {
+          cellPhone,
+        },
       },
-    });
+    );
 
-    if (user) {
+    if (existingUser) {
       throw new PhoneExistException();
     }
 
+    /*
+     * 이미 존재하는 이메일인지 확인합니다.
+     */
     await this.emailCheck({ email });
 
-    const query = await this.prismaService.$transaction(async (tx) => {
-      const user = await tx.user.create({
-        data: {
-          email,
-          loginType: 0,
-          roleType: 0,
-        },
+    try {
+      await this.prismaService.$transaction(async (tx) => {
+        newUser = await tx.user.create({
+          data: {
+            email,
+            loginType: 0,
+            roleType: 0,
+          },
+        });
+
+        await tx.userAuthentication.create({
+          data: {
+            userNo: newUser.no,
+            cellPhone,
+            ...rest,
+          },
+        });
       });
-
-      const userAuth = await tx.userAuthentication.create({
-        data: {
-          userNo: user.no,
-          password,
-          name,
-          cellPhone,
-          sex,
-          tosAgree,
-          personalInfoAgree,
-          ageLimitAgree,
-          mailAgree,
-          notificationAgree,
-        },
-      });
-
-      const response: SuccessResponse<{ userNo: number }> = {
-        isSuccess: true,
-        code: '1000',
-        message: '요청에 성공하였습니다.',
-        result: { userNo: user.no },
-      };
-
-      return response;
-    });
-    return query;
+      return newUser.no;
+    } catch (err) {
+      console.log(err);
+      throw new UserNotCreatedException();
+    }
   }
 
   async phoneCheck(cellPhoneDto: CellPhoneDto) {

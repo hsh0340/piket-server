@@ -18,6 +18,8 @@ export enum RequestExceptionCodeEnum {
   UserNoNotFound = '3006',
   // 임시 비밀번호가 틀렸습니다. : 3007
   TempPasswordIncorrect = '3007',
+  // 유저 생성에 실패하였습니다. : 3008
+  UserNotCreated = '3008',
   // 이미 존재하는 브랜드입니다. : 3010
   BrandExists = '3010',
   // 존재하지 않는 카테고리입니다. : 3011
