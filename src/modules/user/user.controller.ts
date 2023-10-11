@@ -37,14 +37,15 @@ export class UserController {
 
   // 전화번호 중복체크 API
   @Post('phone-check')
-  phoneCheck(@Body() cellPhone: CellPhoneDto) {
-    return this.userService.phoneCheck(cellPhone);
+  async phoneCheck(@Body() cellPhone: CellPhoneDto): Promise<string> {
+    await this.userService.phoneDuplicateCheck(cellPhone);
+    return '사용 가능한 전화번호입니다.';
   }
 
   // 이메일 중복체크 API
   @Post('email-check')
   emailCheck(@Body() emailDto: EmailDto) {
-    return this.userService.emailCheck(emailDto);
+    return this.userService.emailDuplicateCheck(emailDto);
   }
 
   // 이메일로그인 API

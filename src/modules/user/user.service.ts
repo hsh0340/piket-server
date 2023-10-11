@@ -49,22 +49,12 @@ export class UserService {
     /*
      * 핸드폰 번호를 기준으로 이미 존재하는 유저인지 확인합니다.
      */
-    const existingUser = await this.prismaService.userAuthentication.findUnique(
-      {
-        where: {
-          cellPhone,
-        },
-      },
-    );
-
-    if (existingUser) {
-      throw new PhoneExistException();
-    }
+    await this.phoneDuplicateCheck({ cellPhone });
 
     /*
      * 이미 존재하는 이메일인지 확인합니다.
      */
-    await this.emailCheck({ email });
+    await this.emailDuplicateCheck({ email });
 
     try {
       await this.prismaService.$transaction(async (tx) => {
@@ -86,34 +76,35 @@ export class UserService {
       });
       return newUser.no;
     } catch (err) {
-      console.log(err);
       throw new UserNotCreatedException();
     }
   }
 
-  async phoneCheck(cellPhoneDto: CellPhoneDto) {
+  /**
+   * 핸드폰 번호를 기준으로 이미 존재하는 유저인지 확인합니다.
+   * @param cellPhoneDto 핸드폰 번호 DTO
+   * @return void
+   * @exception 핸드폰 번호가 이미 존재할 경우 PhoneExistsException 을 반환합니다.
+   */
+  async phoneDuplicateCheck(cellPhoneDto: CellPhoneDto): Promise<void> {
     const { cellPhone } = cellPhoneDto;
-    const isPhoneExist = await this.prismaService.userAuthentication.findFirst({
-      where: {
-        cellPhone,
-      },
-    });
 
-    if (isPhoneExist) {
+    const existingUser = await this.prismaService.userAuthentication.findUnique(
+      {
+        where: {
+          cellPhone,
+        },
+      },
+    );
+
+    if (existingUser) {
       throw new PhoneExistException();
     }
 
-    const response: SuccessResponse<string> = {
-      isSuccess: true,
-      code: '1000',
-      message: '요청에 성공하였습니다.',
-      result: '사용 가능한 전화번호입니다.',
-    };
-
-    return response;
+    return;
   }
 
-  async emailCheck(emailDto: EmailDto) {
+  async emailDuplicateCheck(emailDto: EmailDto) {
     const { email } = emailDto;
     const user = await this.getUserByEmail(email);
 
