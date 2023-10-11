@@ -28,7 +28,9 @@ export class UserController {
 
   // 이메일 회원가입 API
   @Post('email-join')
-  async emailJoin(@Body() emailJoinRequestDto: EmailJoinRequestDto) {
+  async emailJoin(
+    @Body() emailJoinRequestDto: EmailJoinRequestDto,
+  ): Promise<{ userNo: number }> {
     const userNo = await this.userService.emailJoin(emailJoinRequestDto);
     return { userNo };
   }
