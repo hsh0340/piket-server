@@ -28,7 +28,8 @@ import { GetAllBrandsDto } from '@src/modules/brand/dto/get-all-brands.dto';
 @UseInterceptors(ResponseSerializationInterceptor)
 export class BrandController {
   constructor(private readonly brandService: BrandService) {}
-  // 브랜드 목록 API
+
+  // 브랜드 목록 조회 API
   @Get()
   getAllBrands(@User() advertiser: UserEntity): Promise<GetAllBrandsDto[]> {
     return this.brandService.getAllBrands(advertiser);
