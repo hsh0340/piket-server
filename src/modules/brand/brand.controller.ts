@@ -19,6 +19,7 @@ import { Roles } from '@src/modules/auth/decorators/roles.decorator';
 import { RoleType } from '@src/modules/auth/types/role-type';
 import { User } from '@src/modules/auth/decorators/user.decorator';
 import { ResponseSerializationInterceptor } from '@src/common/interceptors/response-serialization.interceptor';
+import { UserEntity } from '@src/entity/user.entity';
 
 @UseGuards(AuthGuard('jwt'), RolesGuard)
 @Roles(RoleType.ADVERTISER)
@@ -35,7 +36,7 @@ export class BrandController {
   // 신규 브랜드 등록 API
   @Post()
   async createBrand(
-    @User() advertiser,
+    @User() advertiser: UserEntity,
     @Body() createBrandRequestDto: CreateBrandRequestDto,
   ): Promise<string> {
     await this.brandService.createBrand(advertiser, createBrandRequestDto);
