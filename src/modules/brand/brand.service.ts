@@ -72,6 +72,16 @@ export class BrandService {
     }
   }
 
+  /**
+   * 브랜드 수정 메서드
+   * @param advertiser 로그인 한 광고주 정보
+   * @param brandId 수정하려는 브랜드의 고유 번호
+   * @param updateBrandRequestDto 브랜드 수정 DTO
+   * @return void
+   * @exception 수정하려는 브랜드가 존재하지 않을 경우 BrandNotExistsException 을 반환합니다.
+   * @exception 업데이트 된 브랜드의 정보가 없을 경우 NoBrandInfoUpdatedException 을 반환합니다.
+   * @exception 브랜드 업데이트에 실패한 경우 BrandNotUpdatedException 을 반환합니다.
+   */
   async updateBrand(
     advertiser: UserEntity,
     brandId: number,
