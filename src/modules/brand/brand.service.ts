@@ -6,6 +6,7 @@ import {
   BrandNotCreatedException,
   CategoryNotFoundException,
 } from '@src/common/exceptions/request.exception';
+import { UserEntity } from '@src/entity/user.entity';
 
 @Injectable()
 export class BrandService {
@@ -16,8 +17,16 @@ export class BrandService {
     return brands;
   }
 
+  /**
+   * 브랜드 생성 메서드
+   * @param advertiser 로그인 한 광고주 정보
+   * @param createBrandRequestDto 브랜드 생성 DTO
+   * @return void
+   * @exception 브랜드가 이미 존재할 경우 BrandExistsException 을 반환합니다.
+   * @exception 브랜드가 생성되지 않았을 경우 BrandNotCreatedException 을 반환합니다.
+   */
   async createBrand(
-    advertiser,
+    advertiser: UserEntity,
     createBrandRequestDto: CreateBrandRequestDto,
   ): Promise<void> {
     try {
