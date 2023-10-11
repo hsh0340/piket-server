@@ -29,5 +29,5 @@ export class CreateBrandRequestDto {
   @IsOptional()
   @Matches(/^[a-zA-Z0-9가-힣 ]*$/)
   @MaxLength(30)
-  description?: string;
+  description: string;
 }

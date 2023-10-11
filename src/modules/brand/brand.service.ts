@@ -124,7 +124,12 @@ export class BrandService {
 
       return;
     } catch (err) {
-      throw new BrandNotUpdatedException();
+      if (err.code === 'P2002') {
+        throw new BrandExistsException();
+      } else {
+        console.log(err);
+        throw new BrandNotUpdatedException();
+      }
     }
   }
 
