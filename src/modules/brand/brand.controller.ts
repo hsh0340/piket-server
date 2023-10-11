@@ -29,8 +29,8 @@ export class BrandController {
   constructor(private readonly brandService: BrandService) {}
   // 브랜드 목록 API
   @Get()
-  getAllBrands() {
-    return this.brandService.getAllBrands();
+  getAllBrands(@User() advertiser: UserEntity) {
+    return this.brandService.getAllBrands(advertiser);
   }
 
   // 신규 브랜드 등록 API

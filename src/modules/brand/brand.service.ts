@@ -12,8 +12,18 @@ import { UserEntity } from '@src/entity/user.entity';
 export class BrandService {
   constructor(private readonly prismaService: PrismaService) {}
 
-  async getAllBrands() {
-    const brands = await this.prismaService.brand.findMany({});
+  async getAllBrands(advertiser: UserEntity) {
+    const brands = await this.prismaService.brand.findMany({
+      select: {
+        id: true,
+        categoryId: true,
+        name: true,
+        description: true,
+      },
+      where: {
+        advertiserNo: advertiser.no,
+      },
+    });
     return brands;
   }
 
