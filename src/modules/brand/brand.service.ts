@@ -7,12 +7,13 @@ import {
   CategoryNotFoundException,
 } from '@src/common/exceptions/request.exception';
 import { UserEntity } from '@src/entity/user.entity';
+import { GetAllBrandsDto } from '@src/modules/brand/dto/get-all-brands.dto';
 
 @Injectable()
 export class BrandService {
   constructor(private readonly prismaService: PrismaService) {}
 
-  async getAllBrands(advertiser: UserEntity) {
+  async getAllBrands(advertiser: UserEntity): Promise<GetAllBrandsDto[]> {
     const brands = await this.prismaService.brand.findMany({
       select: {
         id: true,
@@ -23,7 +24,11 @@ export class BrandService {
       where: {
         advertiserNo: advertiser.no,
       },
+      orderBy: {
+        createdAt: 'desc',
+      },
     });
+
     return brands;
   }
 

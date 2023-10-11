@@ -20,6 +20,7 @@ import { RoleType } from '@src/modules/auth/types/role-type';
 import { User } from '@src/modules/auth/decorators/user.decorator';
 import { ResponseSerializationInterceptor } from '@src/common/interceptors/response-serialization.interceptor';
 import { UserEntity } from '@src/entity/user.entity';
+import { GetAllBrandsDto } from '@src/modules/brand/dto/get-all-brands.dto';
 
 @UseGuards(AuthGuard('jwt'), RolesGuard)
 @Roles(RoleType.ADVERTISER)
@@ -29,7 +30,7 @@ export class BrandController {
   constructor(private readonly brandService: BrandService) {}
   // 브랜드 목록 API
   @Get()
-  getAllBrands(@User() advertiser: UserEntity) {
+  getAllBrands(@User() advertiser: UserEntity): Promise<GetAllBrandsDto[]> {
     return this.brandService.getAllBrands(advertiser);
   }
 
