@@ -36,7 +36,7 @@ export class UserService {
   /**
    * 이메일 기준으로 유저를 조회하는 메서드
    * @param emailDto 이메일 DTO
-   * @return 유저 정보를 리턴합니다.
+   * @return 유저가 존재한다면 유저 객체를 반환하고, 존재하지 않는다면 null 을 반환합니다.
    */
   getUserByEmail(emailDto: EmailDto): Promise<UserEntity | null> {
     return this.prismaService.user.findFirst({
