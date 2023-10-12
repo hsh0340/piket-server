@@ -10,6 +10,18 @@ import {
 } from 'class-validator';
 import { Agreement, Sex } from '@src/common/constants/enum';
 
+/**
+ * @property {string} cellPhone 전화번호
+ * @property {string} password 비밀번호
+ * @property {string} email 이메일
+ * @property {string} name 이름
+ * @property {number} sex 성별
+ * @property {1} tosAgree 이용약관 동의
+ * @property {1} personalInfoAgree 개인정보 수집 동의
+ * @property {1} ageLimitAgree 만 14세 이상 동의
+ * @property {number} mailAgree 혜택 메일 수신 동의
+ * @property {number} notificationAgree 서비스 알림 수신 동의
+ */
 export class EmailJoinRequestDto {
   @IsNotEmpty()
   @IsString()

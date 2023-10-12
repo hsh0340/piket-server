@@ -1,10 +1,7 @@
-import { randomBytes } from 'crypto';
 import { Inject, Injectable } from '@nestjs/common';
 import { EmailJoinRequestDto } from '@src/modules/user/dto/email-join-request.dto';
-
 import { EmailLoginRequestDto } from '@src/modules/user/dto/email-login-request.dto';
 import { AuthService } from '@src/modules/auth/services/auth.service';
-import { SuccessResponse } from '@src/common/interfaces/response.interface';
 import {
   EmailExistException,
   MailNotSentException,
@@ -46,14 +43,7 @@ export class UserService {
     const { cellPhone, email, ...rest } = emailJoinRequestDto;
     let newUser: UserEntity; // db에 insert 된 유저를 리턴하기 위해 선언
 
-    /*
-     * 핸드폰 번호를 기준으로 이미 존재하는 유저인지 확인합니다.
-     */
     await this.phoneDuplicateCheck({ cellPhone });
-
-    /*
-     * 이미 존재하는 이메일인지 확인합니다.
-     */
     await this.emailDuplicateCheck({ email });
 
     try {
@@ -81,7 +71,7 @@ export class UserService {
   }
 
   /**
-   * 핸드폰 번호를 기준으로 이미 존재하는 유저인지 확인합니다.
+   * 핸드폰 번호를 기준으로 이미 존재하는 유저인지 확인하는 메서드
    * @param cellPhoneDto 핸드폰 번호 DTO
    * @return void
    * @exception 핸드폰 번호가 이미 존재할 경우 PhoneExistsException 을 반환합니다.
@@ -104,183 +94,172 @@ export class UserService {
     return;
   }
 
-  async emailDuplicateCheck(emailDto: EmailDto) {
-    const { email } = emailDto;
-    const user = await this.getUserByEmail(email);
+  /**
+   * 이미 존재하는 이메일인지 확인하는 메서드
+   * @param emailDto 이메일 DTO
+   * @return void
+   * @exception 이메일이 이미 존재할 경우 EmailExistsException 을 반환합니다.
+   */
+  async emailDuplicateCheck(emailDto: EmailDto): Promise<void> {
+    const existingUser = await this.getUserByEmail(emailDto);
 
-    if (user) {
+    if (existingUser) {
       throw new EmailExistException();
     }
 
-    const response: SuccessResponse<string> = {
-      isSuccess: true,
-      code: '1000',
-      message: '요청에 성공하였습니다.',
-      result: '사용 가능한 이메일입니다.',
-    };
-
-    return response;
+    return;
   }
 
-  async emailLogin(emailLoginRequestDto: EmailLoginRequestDto) {
+  /**
+   * 이메일 로그인 메서드
+   * @param emailLoginRequestDto 이메일 로그인 DTO
+   * @return 로그인 성공한 유저의 정보와 jwt 토큰을 반환합니다.
+   * @exception 이메일에 해당하는 유저가 존재하지 않을 때 UserNotFoundException 을 반환합니다.
+   * @exception 이메일 기준으로 조회한 유저의 비밀번호와 로그인 시 입력한 비밀번호가 일치하지 않으면 PasswordMismatchException 을 반환합니다.
+   */
+  async emailLogin(emailLoginRequestDto: EmailLoginRequestDto): Promise<{
+    accessToken: string;
+    refreshToken: string;
+    userNo: number;
+    userRoleType: number;
+    userName: string;
+  }> {
     const { email, password } = emailLoginRequestDto;
-    const user = await this.getUserByEmail(email);
-    if (!user) {
+
+    const existingUser = await this.getUserByEmail({ email });
+
+    if (!existingUser) {
       throw new UserNotFoundException();
     }
-    const savedAuth = await this.prismaService.userAuthentication.findFirst({
-      where: {
-        userNo: user.no,
-        password,
-      },
-    });
 
-    if (!savedAuth) {
+    /*
+     * 이메일 기준으로 조회한 유저의 비밀번호와 로그인 시 입력한 비밀번호가 일치하는지 확인합니다.
+     */
+    const existingUserAuth =
+      await this.prismaService.userAuthentication.findFirst({
+        where: {
+          userNo: existingUser.no,
+          password,
+        },
+      });
+
+    if (!existingUserAuth) {
       throw new PasswordMismatchException();
     }
 
-    const payload = user.no;
+    /**
+     * jwt 토큰을 발급합니다.
+     */
+    const payload = existingUser.no;
     const accessToken = this.authService.issueAccessToken(payload);
     const refreshToken = await this.authService.issueRefreshToken(payload);
 
-    const response: SuccessResponse<any> = {
-      isSuccess: true,
-      code: '1000',
-      message: '요청에 성공하였습니다.',
-      result: {
-        accessToken,
-        refreshToken,
-        userNo: user.no,
-        userRoleType: user.roleType,
-        userName: savedAuth.name,
-      },
+    return {
+      accessToken,
+      refreshToken,
+      userNo: existingUser.no,
+      userRoleType: existingUser.roleType,
+      userName: existingUserAuth.name,
     };
-
-    return response;
   }
 
-  async findEmail(findEmailRequestDto: FindEmailRequestDto) {
-    const { name, cellPhone } = findEmailRequestDto;
-    const user = await this.prismaService.userAuthentication.findFirst({
-      where: {
-        name,
-        cellPhone,
-      },
-    });
-
-    if (!user) {
-      throw new UserNotFoundException();
-    }
-
-    const userEmail = await this.prismaService.user.findFirst({
-      where: {
-        no: user.userNo,
-      },
-    });
-
-    const response: SuccessResponse<{ userNo: number; email: string }> = {
-      isSuccess: true,
-      code: '1000',
-      message: '요청에 성공하였습니다.',
-      result: {
-        userNo: user.userNo,
-        email: userEmail.email,
-      },
-    };
-
-    return response;
-  }
-
-  async findPassword(emailDto: EmailDto) {
-    const { email } = emailDto;
-    const user = await this.getUserByEmail(email);
-    if (!user) {
-      throw new UserNotFoundException();
-    }
-    const userAuth = await this.prismaService.userAuthentication.findFirst({
-      where: {
-        userNo: user.no,
-      },
-    });
-
-    const response: SuccessResponse<{
-      userNo: number;
-      cellPhone: string;
-      email: string;
-    }> = {
-      isSuccess: true,
-      code: '1000',
-      message: '요청에 성공하였습니다.',
-      result: {
-        userNo: user.no,
-        cellPhone: userAuth.cellPhone,
-        email: user.email,
-      },
-    };
-
-    return response;
-  }
-
-  async getUserByEmail(email: string) {
-    const user = await this.prismaService.user.findFirst({
-      where: {
-        email,
-      },
-    });
-
-    return user;
-  }
-
-  /**\
-   * @deprecated
-   * 비밀번호 재설정 방식이 바뀌면서 삭제 될 예정
+  /**
+   * 이메일 찾기 메서드
+   * @param findEmailRequestDto 이메일 찾기 DTO
+   * @return 유저 고유 번호와 이메일을 반환합니다.
+   * @exception 입력한 이름과 전화번호에 해당하는 유저가 존재하지 않으면 UserNotFoundException 을 반환합니다.
    */
-  async sendPasswordResetEmail(emailDto: EmailDto) {
-    const { email } = emailDto;
-    const user = await this.getUserByEmail(email);
-    if (!user) {
+  async findEmail(findEmailRequestDto: FindEmailRequestDto): Promise<{
+    userNo: number;
+    email: string;
+  }> {
+    /*
+     * 입력한 이름과 전화번호에 해당하는 유저가 존재하는지 확인합니다.
+     */
+    const existingUserAuth =
+      await this.prismaService.userAuthentication.findFirst({
+        where: findEmailRequestDto,
+      });
+
+    if (!existingUserAuth) {
       throw new UserNotFoundException();
     }
 
-    // 1. 무작위 토큰 생성
-    const passwordResetToken = randomBytes(15).toString('base64url');
-
-    // 2. 레디스에 회원 고유번호와 무작위 토큰 저장
-    await this.cacheManager.set(user.no, passwordResetToken, {
-      ttl: 60 * 60 * 30,
+    /*
+     * 유저의 이메일을 조회합니다.
+     */
+    const existingUser = await this.prismaService.user.findUnique({
+      where: {
+        no: existingUserAuth.userNo,
+      },
     });
 
-    // 3. 메일 발송
-    await this.mailerService.sendMail({
-      from: 'hsh0340@naver.com',
-      to: user.email,
-      subject: '비밀번호 초기화 이메일입니다.',
-      html: `비밀번호 초기화를 위해서는 아래의 URL을 클릭하여 주세요. http://example/reset-password/${passwordResetToken}`,
-    });
-
-    const response: SuccessResponse<string> = {
-      isSuccess: true,
-      code: '1000',
-      message: '요청에 성공하였습니다.',
-      result: '이메일 발송에 성공하였습니다.',
+    return {
+      userNo: existingUser.no,
+      email: existingUser.email,
     };
-
-    return response;
   }
 
+  /**
+   * 비밀번호 찾기 메서드
+   * @param emailDto 이메일 DTO
+   * @return 유저의 고유번호, 핸드폰 번호, 이메일을 반환합니다.
+   * @exception 이메일에 해당하는 유저가 존재하지 않는 경우 UserNotFoundException 을 반환합니다.
+   */
+  async findPassword(
+    emailDto: EmailDto,
+  ): Promise<{ userNo: number; cellPhone: string; email: string }> {
+    const existingUser = await this.getUserByEmail(emailDto);
+
+    if (!existingUser) {
+      throw new UserNotFoundException();
+    }
+
+    const existingUserAuth =
+      await this.prismaService.userAuthentication.findFirst({
+        where: {
+          userNo: existingUser.no,
+        },
+      });
+
+    return {
+      userNo: existingUser.no,
+      cellPhone: existingUserAuth.cellPhone,
+      email: existingUser.email,
+    };
+  }
+
+  /**
+   * 이메일 기준으로 유저를 조회하는 메서드
+   * @param emailDto 이메일 DTO
+   * @return 유저 정보를 리턴합니다.
+   */
+  getUserByEmail(emailDto: EmailDto): Promise<UserEntity | null> {
+    return this.prismaService.user.findFirst({
+      where: emailDto,
+    });
+  }
+
+  /**
+   * 임시 비밀번호 메일 전송 메서드
+   * @param emailDto
+   * @return void
+   * @exception 이메일에 해당하는 유저가 존재하지 않을 경우 UserNotFoundException 을 반환합니다.
+   * @exception 비밀번호 업데이트에 실패한 경우 PasswordNotUpdatedException 을 반환합니다.
+   * @exception 메일 전송에 실패했을 경우 MailNotSentException 을 반환합니다.
+   */
   async sendTempPasswordEmail(emailDto: EmailDto) {
-    // 1. 무작위 8자 임시 비밀번호 생성
-    const tempPassword = this.generateRandomPassword();
-    // 2. 비밀번호 업데이트
-    const user = await this.getUserByEmail(emailDto.email);
+    const user = await this.getUserByEmail(emailDto);
+
     if (!user) {
       throw new UserNotFoundException();
     }
+
+    const tempPassword = this.generateRandomPassword();
 
     await this.updatePassword(user.no, tempPassword);
 
     try {
-      // 3. 임시비밀번호, 비밀번호 재설정 페이지로 이동하는 링크가 담긴 메일 발송
       await this.mailerService.sendMail({
         from: 'hsh0340@naver.com',
         to: user.email,
@@ -290,46 +269,43 @@ export class UserService {
         <h1>임시비밀번호</h1>
         ${tempPassword}<br> <button>비밀번호 복사</button><br>
         비밀번호 재설정을 위해서는 아래의 URL을 클릭하여 주세요. http://piket-fe.s3-website.ap-northeast-2.amazonaws.com/find_pw/${user.no}
-        
       `,
       });
     } catch (err) {
       throw new MailNotSentException();
     }
-
-    const response: SuccessResponse<string> = {
-      isSuccess: true,
-      code: '1000',
-      message: '요청에 성공하였습니다.',
-      result: '이메일 발송에 성공하였습니다.',
-    };
-
-    return response;
+    return;
   }
 
-  verifyPasswordToken(token: string) {
-    // 토큰 유효시간 검증
-  }
-
-  generateRandomPassword() {
+  /**
+   * 무작위 8자 비밀번호를 생성하는 메서드
+   * @return 영문, 특수문자가 포함된 길이가 8인 무작위 문자열을 반환합니다.
+   */
+  generateRandomPassword(): string {
     const lowercaseChars = 'abcdefghijklmnopqrstuvwxyz';
     const uppercaseChars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
     const numericChars = '0123456789';
     const specialChars = '!@#$%^&*()-_=+[]{}|;:,.<>?';
 
-    // 각 카테고리에서 무작위 문자 선택
+    /*
+     * 각 카테고리에서 무작위 문자를 선택합니다.
+     */
     const randomLowercaseChar = this.getRandomChar(lowercaseChars);
     const randomUppercaseChar = this.getRandomChar(uppercaseChars);
     const randomNumericChar = this.getRandomChar(numericChars);
     const randomSpecialChar = this.getRandomChar(specialChars);
 
-    // 나머지 글자 생성
+    /*
+     * 나머지 글자를 생성합니다.
+     */
     const remainingChars = this.getRandomChars(
       lowercaseChars + uppercaseChars + numericChars + specialChars,
       4,
     );
 
-    // 모든 문자 결합
+    /*
+     * 모든 문자를 결합합니다.
+     */
     const passwordChars =
       randomLowercaseChar +
       randomUppercaseChar +
@@ -337,7 +313,9 @@ export class UserService {
       randomSpecialChar +
       remainingChars;
 
-    // 문자 무작위로 섞기
+    /*
+     * 문자를 무작위로 섞습니다.
+     */
     const passwordArray = passwordChars.split('');
     for (let i = passwordArray.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
@@ -347,18 +325,29 @@ export class UserService {
       ];
     }
 
-    // 배열을 문자열로 변환
-    const randomPassword = passwordArray.join('');
-
-    return randomPassword;
+    /*
+     * 배열을 문자열로 변환합니다.
+     */
+    return passwordArray.join('');
   }
 
-  getRandomChar(characters) {
+  /**
+   * 문자열 내에서 무작위 문자를 선택하는 메서드
+   * @param characters 무작위 문자를 선택하기 위한 문자열
+   * @return 무작위 문자
+   */
+  getRandomChar(characters: string) {
     const randomIndex = Math.floor(Math.random() * characters.length);
     return characters[randomIndex];
   }
 
-  getRandomChars(characters, count) {
+  /**
+   * 문자열 내에서 무작위 문자를 count 만큼 선택하는 메서드
+   * @param characters 무작위 문자를 선택하기 위한 문자열
+   * @param count 반환할 무작위 문자열의 길이
+   * @return 길이가 count 인 무작위 문자열
+   */
+  getRandomChars(characters: string, count: number) {
     let result = '';
     for (let i = 0; i < count; i++) {
       result += this.getRandomChar(characters);
@@ -366,7 +355,14 @@ export class UserService {
     return result;
   }
 
-  async updatePassword(userNo: number, password: string) {
+  /**
+   * 비밀번호 업데이트 메서드
+   * @param userNo 유저 고유 번호
+   * @param password 새로운 비밀번호
+   * @return void
+   * @exception 비밀번호 업데이트에 실패한 경우 PasswordNotUpdatedException 을 반환합니다.
+   */
+  async updatePassword(userNo: number, password: string): Promise<void> {
     const passwordUpdateQuery =
       await this.prismaService.userAuthentication.updateMany({
         where: {
@@ -382,6 +378,16 @@ export class UserService {
     }
   }
 
+  /**
+   * 임시로 업데이트 된 비밀번호를 업데이트 하는 메서드
+   * @param userNo 유저 고유번호
+   * @param tempPassword 임시로 업데이트 된 비밀번호
+   * @param newPassword 바꾸려는 비밀번호
+   * @return void
+   * @exception 파라미터로 받은 userNo가 존재하지 않는 경우 UserNoNotFoundException 을 반환합니다.
+   * @exception DB에 저장되어있는 비밀번호와 유저가 입력한 비밀번호가 다른 경우 TempPasswordIncorrectException 을 반환합니다.
+   * @exception 비밀번호 업데이트에 실패한 경우 PasswordNotUpdatedException 을 반환합니다.
+   */
   async resetPassword(userNo: number, tempPassword, newPassword: string) {
     const userAuth = await this.prismaService.userAuthentication.findFirst({
       where: {
@@ -399,13 +405,6 @@ export class UserService {
 
     await this.updatePassword(userNo, newPassword);
 
-    const response: SuccessResponse<string> = {
-      isSuccess: true,
-      code: '1000',
-      message: '요청에 성공하였습니다.',
-      result: '비밀번호 변경에 성공하였습니다.',
-    };
-
-    return response;
+    return;
   }
 }

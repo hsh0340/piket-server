@@ -26,7 +26,9 @@ import { ResponseSerializationInterceptor } from '@src/common/interceptors/respo
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
-  // 이메일 회원가입 API
+  /*
+   * 이메일 회원가입 API
+   */
   @Post('email-join')
   async emailJoin(
     @Body() emailJoinRequestDto: EmailJoinRequestDto,
@@ -35,54 +37,84 @@ export class UserController {
     return { userNo };
   }
 
-  // 전화번호 중복체크 API
+  /*
+   * 전화번호 중복체크 API
+   */
   @Post('phone-check')
   async phoneCheck(@Body() cellPhone: CellPhoneDto): Promise<string> {
     await this.userService.phoneDuplicateCheck(cellPhone);
     return '사용 가능한 전화번호입니다.';
   }
 
-  // 이메일 중복체크 API
+  /*
+   * 이메일 중복체크 API
+   */
   @Post('email-check')
-  emailCheck(@Body() emailDto: EmailDto) {
-    return this.userService.emailDuplicateCheck(emailDto);
+  async emailCheck(@Body() emailDto: EmailDto): Promise<string> {
+    await this.userService.emailDuplicateCheck(emailDto);
+    return '사용 가능한 이메일입니다.';
   }
 
-  // 이메일로그인 API
+  /*
+   * 이메일로그인 API
+   */
   @Post('email-login')
-  emailLogin(@Body() emailLoginRequestDto: EmailLoginRequestDto) {
+  emailLogin(@Body() emailLoginRequestDto: EmailLoginRequestDto): Promise<{
+    accessToken: string;
+    refreshToken: string;
+    userNo: number;
+    userRoleType: number;
+    userName: string;
+  }> {
     return this.userService.emailLogin(emailLoginRequestDto);
   }
 
-  // 이메일 찾기 API
+  /*
+   * 이메일 찾기 API
+   */
   @Post('find-email')
-  findEmail(@Body() findEmailRequestDto: FindEmailRequestDto) {
+  findEmail(@Body() findEmailRequestDto: FindEmailRequestDto): Promise<{
+    userNo: number;
+    email: string;
+  }> {
     return this.userService.findEmail(findEmailRequestDto);
   }
 
-  // 비밀번호 찾기
+  /*
+   * 비밀번호 찾기 API
+   */
   @Post('find-password')
-  verifyEmail(@Body() emailDto: EmailDto) {
+  verifyEmail(
+    @Body() emailDto: EmailDto,
+  ): Promise<{ userNo: number; cellPhone: string; email: string }> {
     return this.userService.findPassword(emailDto);
   }
 
-  // 임시 비밀번호 메일 발송 API
+  /*
+   * 임시 비밀번호 메일 발송 API
+   */
   @Post('send-temp-password-email')
-  sendTempPasswordEmail(@Body() emailDto: EmailDto) {
-    return this.userService.sendTempPasswordEmail(emailDto);
+  async sendTempPasswordEmail(@Body() emailDto: EmailDto): Promise<string> {
+    await this.userService.sendTempPasswordEmail(emailDto);
+    return '이메일 발송에 성공하였습니다.';
   }
 
-  // 비밀번호 재설정 API
+  /*
+   * 비밀번호 재설정 API
+   */
   @Post('reset-password/:userNo')
-  resetPassword(
+  async resetPassword(
     @Param('userNo', new ParseIntPipe()) userNo: number,
     @Body('tempPassword') tempPassword: string,
     @Body('newPassword') newPassword: string,
   ) {
-    return this.userService.resetPassword(userNo, tempPassword, newPassword);
+    await this.userService.resetPassword(userNo, tempPassword, newPassword);
+    return '비밀번호 변경에 성공하였습니다.';
   }
 
-  // 로그인 권한 테스트 API
+  /*
+   * 로그인 권한 테스트 API
+   */
   @UseGuards(AuthGuard('jwt'), RolesGuard)
   @Roles(RoleType.UNDEFINED)
   @Get('login-test')

@@ -1,5 +1,8 @@
 import { IsNotEmpty, IsString, Matches } from 'class-validator';
 
+/**
+ * @property {string} email 이메일
+ */
 export class EmailDto {
   @IsNotEmpty()
   @IsString()
