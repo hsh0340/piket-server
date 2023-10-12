@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { EmailJoinRequestDto } from '@src/modules/user/dto/email-join-request.dto';
 import { EmailLoginRequestDto } from '@src/modules/user/dto/email-login-request.dto';
 import { AuthService } from '@src/modules/auth/services/auth.service';
@@ -20,6 +20,8 @@ import { CellPhoneDto } from '@src/modules/user/dto/cell-phone.dto';
 import { EmailDto } from '@src/modules/user/dto/email.dto';
 import { PrismaService } from '@src/modules/prisma/prisma.service';
 import { UserEntity } from '@src/entity/user.entity';
+import { LoginType } from '@src/common/constants/enum';
+import { RoleType } from '@src/modules/auth/types/role-type';
 
 @Injectable()
 export class UserService {
@@ -32,6 +34,17 @@ export class UserService {
   ) {}
 
   /**
+   * 이메일 기준으로 유저를 조회하는 메서드
+   * @param emailDto 이메일 DTO
+   * @return 유저 정보를 리턴합니다.
+   */
+  getUserByEmail(emailDto: EmailDto): Promise<UserEntity | null> {
+    return this.prismaService.user.findFirst({
+      where: emailDto,
+    });
+  }
+
+  /**
    * 이메일 회원가입 메서드
    * @param emailJoinRequestDto 이메일 회원가입 DTO
    * @return 생성된 유저의 고유번호를 반환합니다.
@@ -41,33 +54,29 @@ export class UserService {
    */
   async emailJoin(emailJoinRequestDto: EmailJoinRequestDto): Promise<number> {
     const { cellPhone, email, ...rest } = emailJoinRequestDto;
-    let newUser: UserEntity; // db에 insert 된 유저를 리턴하기 위해 선언
 
     await this.phoneDuplicateCheck({ cellPhone });
     await this.emailDuplicateCheck({ email });
 
-    try {
-      await this.prismaService.$transaction(async (tx) => {
-        newUser = await tx.user.create({
-          data: {
-            email,
-            loginType: 0,
-            roleType: 0,
-          },
-        });
-
-        await tx.userAuthentication.create({
-          data: {
-            userNo: newUser.no,
+    const newUser = await this.prismaService.user.create({
+      data: {
+        email,
+        loginType: LoginType.EMAIL,
+        roleType: RoleType.UNDEFINED,
+        userAuthentication: {
+          create: {
             cellPhone,
             ...rest,
           },
-        });
-      });
-      return newUser.no;
-    } catch (err) {
+        },
+      },
+    });
+
+    if (!newUser) {
       throw new UserNotCreatedException();
     }
+
+    return newUser.no;
   }
 
   /**
@@ -194,6 +203,10 @@ export class UserService {
       },
     });
 
+    if (!existingUser) {
+      throw new UserNotFoundException();
+    }
+
     return {
       userNo: existingUser.no,
       email: existingUser.email,
@@ -222,22 +235,15 @@ export class UserService {
         },
       });
 
+    if (!existingUserAuth) {
+      throw new NotFoundException();
+    }
+
     return {
       userNo: existingUser.no,
       cellPhone: existingUserAuth.cellPhone,
       email: existingUser.email,
     };
-  }
-
-  /**
-   * 이메일 기준으로 유저를 조회하는 메서드
-   * @param emailDto 이메일 DTO
-   * @return 유저 정보를 리턴합니다.
-   */
-  getUserByEmail(emailDto: EmailDto): Promise<UserEntity | null> {
-    return this.prismaService.user.findFirst({
-      where: emailDto,
-    });
   }
 
   /**
