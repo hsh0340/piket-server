@@ -45,6 +45,30 @@ export class UserService {
   }
 
   /**
+   * 핸드폰 번호를 기준으로 이미 존재하는 유저인지 확인하는 메서드
+   * @param cellPhoneDto 핸드폰 번호 DTO
+   * @return void
+   * @exception 핸드폰 번호가 이미 존재할 경우 PhoneExistsException 을 반환합니다.
+   */
+  async phoneDuplicateCheck(cellPhoneDto: CellPhoneDto): Promise<void> {
+    const { cellPhone } = cellPhoneDto;
+
+    const existingUser = await this.prismaService.userAuthentication.findUnique(
+      {
+        where: {
+          cellPhone,
+        },
+      },
+    );
+
+    if (existingUser) {
+      throw new PhoneExistException();
+    }
+
+    return;
+  }
+
+  /**
    * 이메일 회원가입 메서드
    * @param emailJoinRequestDto 이메일 회원가입 DTO
    * @return 생성된 유저의 고유번호를 반환합니다.
@@ -77,30 +101,6 @@ export class UserService {
     }
 
     return newUser.no;
-  }
-
-  /**
-   * 핸드폰 번호를 기준으로 이미 존재하는 유저인지 확인하는 메서드
-   * @param cellPhoneDto 핸드폰 번호 DTO
-   * @return void
-   * @exception 핸드폰 번호가 이미 존재할 경우 PhoneExistsException 을 반환합니다.
-   */
-  async phoneDuplicateCheck(cellPhoneDto: CellPhoneDto): Promise<void> {
-    const { cellPhone } = cellPhoneDto;
-
-    const existingUser = await this.prismaService.userAuthentication.findUnique(
-      {
-        where: {
-          cellPhone,
-        },
-      },
-    );
-
-    if (existingUser) {
-      throw new PhoneExistException();
-    }
-
-    return;
   }
 
   /**

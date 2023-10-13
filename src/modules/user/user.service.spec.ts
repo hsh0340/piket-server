@@ -8,6 +8,8 @@ import { mockAuthService, mockMailerService } from '@test/mock/mock-services';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { UserEntity } from '@src/entity/user.entity';
 import { EmailDto } from '@src/modules/user/dto/email.dto';
+import { CellPhoneDto } from '@src/modules/user/dto/cell-phone.dto';
+import { UserAuthenticationEntity } from '@src/entity/user-authentication.entity';
 
 describe('UserService', () => {
   let userService: UserService;
@@ -80,6 +82,34 @@ describe('UserService', () => {
       mockPrismaService.user.findFirst.mockResolvedValue(null);
 
       await expect(userService.getUserByEmail(emailDto)).resolves.toBeNull();
+    });
+  });
+
+  describe('phoneDuplicateCheck', () => {
+    let cellPhoneDto: CellPhoneDto;
+    let userAuth: UserAuthenticationEntity;
+
+    beforeEach(() => {
+      cellPhoneDto = new CellPhoneDto();
+      userAuth = new UserAuthenticationEntity();
+    });
+
+    it('유저가 존재하지 않는 경우 return 하지 않아야합니다.', async () => {
+      mockPrismaService.userAuthentication.findUnique.mockResolvedValue(null);
+
+      await expect(
+        userService.phoneDuplicateCheck(cellPhoneDto),
+      ).resolves.toBeUndefined();
+    });
+
+    it('유저가 존재하는 경우 예외를 던져야 합니다.', async () => {
+      mockPrismaService.userAuthentication.findUnique.mockResolvedValue(
+        userAuth,
+      );
+
+      await expect(
+        userService.phoneDuplicateCheck(cellPhoneDto),
+      ).rejects.toThrowError();
     });
   });
 });
