@@ -1,12 +1,14 @@
 import { PrismaClient } from '@prisma/client';
 import { userSeed } from './functions/user.seed';
 import { brandCategorySeed } from './functions/brand-category.seed';
+import { testAccountSeed } from './functions/test-account.seed';
 
 const prisma = new PrismaClient();
 
 async function seed() {
   await userSeed(prisma);
-  await brandCategorySeed(prisma);
+  // await brandCategorySeed(prisma);
+  await testAccountSeed(prisma);
 }
 
 seed()

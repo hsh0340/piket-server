@@ -16,15 +16,6 @@ const getRandomRoleType = () => {
 };
 
 export const userSeed = async (prisma) => {
-  // await prisma.user.createMany({
-  //   data: [
-  //     {
-  //       email: faker.internet.email(),
-  //       loginType: getRandomLoginType(),
-  //       roleType: getRandomRoleType(),
-  //     },
-  //   ],
-  // });
   for (let i = 0; i < 500; i++) {
     await prisma.$transaction(async (tx) => {
       const firstName = faker.person.firstName();
