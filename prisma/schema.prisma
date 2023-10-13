@@ -8,25 +8,25 @@ datasource db {
 }
 
 model User {
-  no                 Int                  @id @default(autoincrement()) @db.UnsignedInt
-  email              String               @unique(map: "email") @db.VarChar(50)
-  loginType          Int                  @map("login_type") @db.UnsignedTinyInt
-  roleType           Int                  @default(0) @map("role_type") @db.UnsignedTinyInt
-  createdAt          DateTime             @default(now()) @map("created_at") @db.DateTime(0)
-  updatedAt          DateTime             @default(now()) @map("updated_at") @db.DateTime(0)
-  deletedAt          DateTime?            @map("deleted_at") @db.DateTime(0)
+  no                 Int                 @id @default(autoincrement()) @db.UnsignedInt
+  email              String              @unique(map: "user_email_UNI") @db.VarChar(50)
+  loginType          Int                 @map("login_type") @db.UnsignedTinyInt
+  roleType           Int                 @default(0) @map("role_type") @db.UnsignedTinyInt
+  createdAt          DateTime            @default(now()) @map("created_at") @db.DateTime(0)
+  updatedAt          DateTime            @default(now()) @map("updated_at") @db.DateTime(0)
+  deletedAt          DateTime?           @map("deleted_at") @db.DateTime(0)
   brand              Brand[]
-  userAuthentication UserAuthentication[]
+  userAuthentication UserAuthentication?
 
   @@map("user")
 }
 
 model UserAuthentication {
   id                Int       @id @default(autoincrement()) @db.UnsignedInt
-  userNo            Int       @map("user_no") @db.UnsignedInt
+  userNo            Int       @unique(map: "user_authentication_user_no_UNI") @map("user_no") @db.UnsignedInt
   password          String?   @db.VarChar(255)
   name              String    @db.VarChar(30)
-  cellPhone         String    @unique(map: "cell_phone") @map("cell_phone") @db.VarChar(30)
+  cellPhone         String    @unique(map: "user_authentication_cell_phone_UNI") @map("cell_phone") @db.VarChar(30)
   sex               Int       @db.UnsignedTinyInt
   tosAgree          Int       @map("tos_agree") @db.UnsignedTinyInt
   personalInfoAgree Int       @map("personal_info_agree") @db.UnsignedTinyInt
@@ -36,9 +36,8 @@ model UserAuthentication {
   createdAt         DateTime  @default(now()) @map("created_at") @db.DateTime(0)
   updatedAt         DateTime  @default(now()) @map("updated_at") @db.DateTime(0)
   deletedAt         DateTime? @map("deleted_at") @db.DateTime(0)
-  user              User      @relation(fields: [userNo], references: [no], onDelete: NoAction, onUpdate: NoAction, map: "user_authentication_user_no_FK")
+  user              User      @relation(fields: [userNo], references: [no], onDelete: Cascade, onUpdate: NoAction, map: "user_authentication_user_no_FK")
 
-  @@index([userNo], map: "user_authentication_user_no_FK")
   @@map("user_authentication")
 }
 
@@ -50,17 +49,18 @@ model Brand {
   description   String?       @db.VarChar(60)
   createdAt     DateTime      @default(now()) @map("created_at") @db.DateTime(0)
   updatedAt     DateTime      @default(now()) @map("updated_at") @db.DateTime(0)
-  user          User          @relation(fields: [advertiserNo], references: [no], onDelete: NoAction, onUpdate: NoAction, map: "brand_advertiser_no_FK")
-  brandCategory BrandCategory @relation(fields: [categoryId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "brand_category_id_FK")
+  deleted_at    DateTime?     @db.DateTime(0)
+  user          User          @relation(fields: [advertiserNo], references: [no], onDelete: Cascade, onUpdate: NoAction, map: "brand_advertiser_no_FK")
+  brandCategory BrandCategory @relation(fields: [categoryId], references: [id], onDelete: NoAction, map: "brand_category_id_FK")
 
-  @@unique([advertiserNo, categoryId, name], map: "brand_ad_category_name")
+  @@unique([advertiserNo, categoryId, name], map: "brand_ad_category_name_UNI")
   @@index([categoryId], map: "brand_category_id_FK")
   @@map("brand")
 }
 
 model BrandCategory {
   id        Int      @id @db.UnsignedInt
-  name      String   @unique(map: "name") @db.VarChar(20)
+  name      String   @unique(map: "brand_category_name_UNI") @db.VarChar(20)
   createdAt DateTime @default(now()) @map("created_at") @db.DateTime(0)
   updatedAt DateTime @default(now()) @map("updated_at") @db.DateTime(0)
   brand     Brand[]
