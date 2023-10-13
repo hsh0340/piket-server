@@ -14,9 +14,6 @@ import { BrandCategory } from '@src/common/constants/enum';
  * @property {string} description 브랜드 설명
  */
 export class UpdateBrandRequestDto {
-  /**
-  가능, 엔터 및 특수문자 불가능
-   */
   @IsNotEmpty()
   @IsEnum(BrandCategory)
   categoryId: number;
