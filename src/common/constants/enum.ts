@@ -41,3 +41,12 @@ export enum BrandCategory {
   // 기타 : 11
   ETC = 11,
 }
+
+export enum CampaignType {
+  // 배송형 : 0
+  DELIVERY = 0,
+  // 방문형 : 1
+  VISITING = 1,
+  // 기자단 : 2
+  WRITING = 2,
+}
