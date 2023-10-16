@@ -69,6 +69,23 @@ export class UserService {
   }
 
   /**
+   * @deprecated 삭제 예정
+   * 이미 존재하는 이메일인지 확인하는 메서드
+   * @param emailDto 이메일 DTO
+   * @return void
+   * @exception 이메일이 이미 존재할 경우 EmailExistsException 을 반환합니다.
+   */
+  async emailDuplicateCheck(emailDto: EmailDto): Promise<void> {
+    const existingUser = await this.getUserByEmail(emailDto);
+
+    if (existingUser) {
+      throw new EmailExistException();
+    }
+
+    return;
+  }
+
+  /**
    * 이메일 회원가입 메서드
    * @param emailJoinRequestDto 이메일 회원가입 DTO
    * @return 생성된 유저의 고유번호를 반환합니다.
@@ -80,7 +97,12 @@ export class UserService {
     const { cellPhone, email, ...rest } = emailJoinRequestDto;
 
     await this.phoneDuplicateCheck({ cellPhone });
-    await this.emailDuplicateCheck({ email });
+
+    const existingUser = await this.getUserByEmail({ email });
+
+    if (existingUser) {
+      throw new EmailExistException();
+    }
 
     const newUser = await this.prismaService.user.create({
       data: {
@@ -101,22 +123,6 @@ export class UserService {
     }
 
     return newUser.no;
-  }
-
-  /**
-   * 이미 존재하는 이메일인지 확인하는 메서드
-   * @param emailDto 이메일 DTO
-   * @return void
-   * @exception 이메일이 이미 존재할 경우 EmailExistsException 을 반환합니다.
-   */
-  async emailDuplicateCheck(emailDto: EmailDto): Promise<void> {
-    const existingUser = await this.getUserByEmail(emailDto);
-
-    if (existingUser) {
-      throw new EmailExistException();
-    }
-
-    return;
   }
 
   /**
@@ -410,7 +416,6 @@ export class UserService {
     }
 
     await this.updatePassword(userNo, newPassword);
-
     return;
   }
 }
