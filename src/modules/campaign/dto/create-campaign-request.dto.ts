@@ -1,3 +1,12 @@
+import {
+  IsArray,
+  IsDate,
+  IsNotEmpty,
+  IsNumber,
+  IsOptional,
+  IsString,
+} from 'class-validator';
+
 /**
  * @property brandId {number} 브랜드 고유번호
  * @property productPrice {number} 제품 가격
@@ -24,27 +33,95 @@
  * @property options {Array<{ name: string; values: Array<string> }> | null} 옵션 배열
  */
 export class CreateCampaignRequestDto {
+  @IsNotEmpty()
+  @IsNumber()
   brandId: number;
+
+  @IsNotEmpty()
+  @IsNumber()
   productPrice: number;
+
+  @IsNotEmpty()
+  @IsString()
   title: string;
+
+  @IsNotEmpty()
+  @IsString()
   info: string;
+
+  @IsNotEmpty()
+  @IsNumber()
   type: number;
+
+  @IsNotEmpty()
+  @IsNumber()
   reward: number;
+
+  @IsNotEmpty()
+  @IsNumber()
   channel: number;
+
+  @IsNotEmpty()
+  @IsNumber()
   recruitment: number;
+
+  @IsNotEmpty()
+  @IsNumber()
   recruitmentCondition: number;
+
+  @IsNotEmpty()
+  @IsDate()
   recruitmentStartsDate: Date;
+
+  @IsNotEmpty()
+  @IsDate()
   recruitmentEndsDate: Date;
+
+  @IsNotEmpty()
+  @IsDate()
   selectionEndsDate: Date;
+
+  @IsNotEmpty()
+  @IsDate()
   experienceEndsDate: Date;
+
+  @IsNotEmpty()
+  @IsDate()
   submitStartsDate: Date;
+
+  @IsNotEmpty()
+  @IsDate()
   submitEndsDate: Date;
+
+  @IsString()
+  @IsOptional()
   postingGuide: string | null;
+
+  @IsString()
+  @IsOptional()
   caution: string | null;
+
+  @IsArray()
+  @IsOptional()
   hashtag: Array<string> | null;
+
+  @IsString()
+  @IsOptional()
   company: string | null;
+
+  @IsString()
+  @IsNotEmpty()
   managerName: string;
+
+  @IsString()
+  @IsNotEmpty()
   managerTel: string;
+
+  @IsString()
+  @IsOptional()
   managerEmail: string | null;
+
+  @IsArray()
+  @IsOptional()
   options: Array<{ name: string; values: Array<string> }> | null;
 }
