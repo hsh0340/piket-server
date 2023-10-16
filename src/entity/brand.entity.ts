@@ -8,5 +8,5 @@ export class BrandEntity implements Brand {
   description: string | null;
   createdAt: Date;
   updatedAt: Date;
-  deleted_at: Date | null;
+  deletedAt: Date | null;
 }
