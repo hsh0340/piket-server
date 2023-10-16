@@ -6,4 +6,12 @@ import { ResponseSerializationInterceptor } from '@src/common/interceptors/respo
 @Controller('campaign')
 export class CampaignController {
   constructor(private readonly campaignService: CampaignService) {}
+
+  /*
+   * 캠페인 등록 API
+   */
+  async createCampaign(createCampaignRequestDto: CreateCampaignRequestDto) {
+    await this.campaignService.createCampaign();
+    return '캠페인 등록에 성공하였습니다.';
+  }
 }
