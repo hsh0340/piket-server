@@ -52,6 +52,7 @@ model Brand {
   deletedAt     DateTime?     @map("deleted_at") @db.DateTime(0)
   user          User          @relation(fields: [advertiserNo], references: [no], onDelete: Cascade, onUpdate: NoAction, map: "brand_advertiser_no_FK")
   brandCategory BrandCategory @relation(fields: [categoryId], references: [id], onDelete: NoAction, map: "brand_category_id_FK")
+  campaign      Campaign[]
 
   @@unique([advertiserNo, categoryId, name], map: "brand_ad_category_name_UNI")
   @@index([categoryId], map: "brand_category_id_FK")
@@ -72,4 +73,38 @@ model BrandCategory {
 model test {
   id    Int @id @default(autoincrement())
   agree Int
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model Campaign {
+  id                    Int       @id @default(autoincrement()) @db.UnsignedInt
+  brandId               Int       @map("brand_id") @db.UnsignedInt
+  productPrice          Int       @map("product_price") @db.UnsignedInt
+  title                 String    @db.VarChar(128)
+  info                  String    @db.VarChar(64)
+  type                  Int       @db.UnsignedTinyInt
+  reward                Int       @db.UnsignedInt
+  channel               Int       @db.UnsignedTinyInt
+  recruitment           Int       @db.UnsignedInt
+  recruitmentCondition  Int       @map("recruitment_condition") @db.UnsignedInt
+  recruitmentStartsDate DateTime  @map("recruitment_starts_date") @db.Date
+  recruitmentEndsDate   DateTime  @map("recruitment_ends_date") @db.Date
+  selectionEndsDate     DateTime  @map("selection_ends_date") @db.Date
+  experienceEndsDate    DateTime  @map("experience_ends_date") @db.Date
+  submitStartsDate      DateTime  @map("submit_starts_date") @db.Date
+  submitEndsDate        DateTime  @map("submit_ends_date") @db.Date
+  postingGuide          String?   @map("posting_guide") @db.VarChar(1024)
+  caution               String?   @db.VarChar(1024)
+  hashtag               String?   @db.VarChar(1024)
+  company               String    @db.VarChar(32)
+  managerName           String    @map("manager_name") @db.VarChar(30)
+  managerTel            String    @map("manager_tel") @db.VarChar(30)
+  managerEmail          String?   @map("manager_email") @db.VarChar(50)
+  createdAt             DateTime  @default(now()) @map("created_at") @db.DateTime(0)
+  updatedAt             DateTime  @default(now()) @map("updated_at") @db.DateTime(0)
+  deletedAt             DateTime? @map("deleted_at") @db.DateTime(0)
+  brand                 Brand     @relation(fields: [brandId], references: [id], onDelete: Cascade, map: "brand_id_FK")
+
+  @@index([brandId], map: "brand_id_FK")
+  @@map("campaign")
 }
