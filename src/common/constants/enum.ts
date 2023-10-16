@@ -58,7 +58,7 @@ export enum CampaignChannel {
   INSTAGRAM = 1,
 }
 
-export enum CampaignRecruitment {
+export enum CampaignRecruitmentCondition {
   NO_CONDITION = 0,
   BETWEEN_0_AND_199 = 1,
   BETWEEN_200_AND_499 = 2,
