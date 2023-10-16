@@ -4,9 +4,9 @@ import { CreateBrandRequestDto } from '@src/modules/brand/dto/create-brand-reque
 import {
   BrandExistsException,
   BrandNotCreatedException,
+  BrandNotExistsException,
   BrandNotUpdatedException,
   BrandsNotFoundException,
-  BrandNotExistsException,
   NoBrandInfoUpdatedException,
 } from '@src/common/exceptions/request.exception';
 import { UserEntity } from '@src/entity/user.entity';
@@ -23,7 +23,7 @@ export class BrandService {
    * @return 조회 한 모든 브랜드의 객체가 담긴 배열을 반환합니다.
    * @exception 브랜드 목록 조회에 실패한 경우 BrandsNotFoundException 을 반환합니다.
    */
-  async getAllBrands(advertiser: UserEntity): Promise<GetAllBrandsDto[]> {
+  async getAllBrands(advertiser: UserEntity): Promise<GetAllBrandsDto[] | []> {
     try {
       return await this.prismaService.brand.findMany({
         select: {
