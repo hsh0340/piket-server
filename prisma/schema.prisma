@@ -16,6 +16,7 @@ model User {
   updatedAt          DateTime            @default(now()) @map("updated_at") @db.DateTime(0)
   deletedAt          DateTime?           @map("deleted_at") @db.DateTime(0)
   brand              Brand[]
+  campaign           Campaign[]
   userAuthentication UserAuthentication?
 
   @@map("user")
@@ -78,6 +79,7 @@ model test {
 /// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
 model Campaign {
   id                    Int       @id @default(autoincrement()) @db.UnsignedInt
+  advertiserNo          Int       @map("advertiser_no") @db.UnsignedInt
   brandId               Int       @map("brand_id") @db.UnsignedInt
   productPrice          Int       @map("product_price") @db.UnsignedInt
   title                 String    @db.VarChar(128)
@@ -103,8 +105,10 @@ model Campaign {
   createdAt             DateTime  @default(now()) @map("created_at") @db.DateTime(0)
   updatedAt             DateTime  @default(now()) @map("updated_at") @db.DateTime(0)
   deletedAt             DateTime? @map("deleted_at") @db.DateTime(0)
+  user                  User      @relation(fields: [advertiserNo], references: [no], onDelete: Cascade, onUpdate: NoAction, map: "campaign_advertiser_no_FK")
   brand                 Brand     @relation(fields: [brandId], references: [id], onDelete: Cascade, map: "brand_id_FK")
 
-  @@index([brandId], map: "brand_id_FK")
+  @@index([advertiserNo], map: "campaign_advertiser_no_FK")
+  @@index([brandId], map: "campaign_brand_id_FK")
   @@map("campaign")
 }
