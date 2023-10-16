@@ -50,3 +50,10 @@ export enum CampaignType {
   // 기자단 : 2
   WRITING = 2,
 }
+
+export enum CampaignChannel {
+  // 네이버블로그 : 0
+  NAVER_BLOG = 0,
+  // 인스타그램 : 1
+  INSTAGRAM = 1,
+}
