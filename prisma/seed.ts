@@ -2,13 +2,15 @@ import { PrismaClient } from '@prisma/client';
 import { userSeed } from './functions/user.seed';
 import { brandCategorySeed } from './functions/brand-category.seed';
 import { testAccountSeed } from './functions/test-account.seed';
+import { channelConditionSeed } from './functions/channel-condition.seed';
 
 const prisma = new PrismaClient();
 
 async function seed() {
-  await userSeed(prisma);
+  // await userSeed(prisma);
   // await brandCategorySeed(prisma);
-  await testAccountSeed(prisma);
+  // await testAccountSeed(prisma);
+  await channelConditionSeed(prisma);
 }
 
 seed()
