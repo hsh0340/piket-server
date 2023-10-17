@@ -71,44 +71,121 @@ model BrandCategory {
 }
 
 /// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
-model test {
-  id    Int @id @default(autoincrement())
-  agree Int
-}
-
-/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
 model Campaign {
-  id                    Int       @id @default(autoincrement()) @db.UnsignedInt
-  advertiserNo          Int       @map("advertiser_no") @db.UnsignedInt
-  brandId               Int       @map("brand_id") @db.UnsignedInt
-  productPrice          Int       @map("product_price") @db.UnsignedInt
-  title                 String    @db.VarChar(128)
-  info                  String    @db.VarChar(64)
-  type                  Int       @db.UnsignedTinyInt
-  reward                Int       @db.UnsignedInt
-  channel               Int       @db.UnsignedTinyInt
-  recruitment           Int       @db.UnsignedInt
-  recruitmentCondition  Int       @map("recruitment_condition") @db.UnsignedInt
-  recruitmentStartsDate DateTime  @map("recruitment_starts_date") @db.Date
-  recruitmentEndsDate   DateTime  @map("recruitment_ends_date") @db.Date
-  selectionEndsDate     DateTime  @map("selection_ends_date") @db.Date
-  experienceEndsDate    DateTime  @map("experience_ends_date") @db.Date
-  submitStartsDate      DateTime  @map("submit_starts_date") @db.Date
-  submitEndsDate        DateTime  @map("submit_ends_date") @db.Date
-  postingGuide          String?   @map("posting_guide") @db.VarChar(1024)
-  caution               String?   @db.VarChar(1024)
-  hashtag               String?   @db.VarChar(1024)
-  company               String    @db.VarChar(32)
-  managerName           String    @map("manager_name") @db.VarChar(30)
-  managerTel            String    @map("manager_tel") @db.VarChar(30)
-  managerEmail          String?   @map("manager_email") @db.VarChar(50)
-  createdAt             DateTime  @default(now()) @map("created_at") @db.DateTime(0)
-  updatedAt             DateTime  @default(now()) @map("updated_at") @db.DateTime(0)
-  deletedAt             DateTime? @map("deleted_at") @db.DateTime(0)
-  user                  User      @relation(fields: [advertiserNo], references: [no], onDelete: Cascade, onUpdate: NoAction, map: "campaign_advertiser_no_FK")
-  brand                 Brand     @relation(fields: [brandId], references: [id], onDelete: Cascade, map: "brand_id_FK")
+  id                       Int                      @id @default(autoincrement()) @db.UnsignedInt
+  advertiserNo             Int                      @map("advertiser_no") @db.UnsignedInt
+  brandId                  Int                      @map("brand_id") @db.UnsignedInt
+  channelConditionId       Int                      @map("channel_condition_id") @db.UnsignedInt
+  title                    String                   @db.VarChar(128)
+  info                     String                   @db.VarChar(64)
+  type                     Int                      @db.UnsignedTinyInt
+  reward                   Int                      @db.UnsignedInt
+  recruitment              Int                      @db.UnsignedInt
+  recruitmentStartsDate    DateTime                 @map("recruitment_starts_date") @db.Date
+  recruitmentEndsDate      DateTime                 @map("recruitment_ends_date") @db.Date
+  selectionEndsDate        DateTime                 @map("selection_ends_date") @db.Date
+  submitStartsDate         DateTime                 @map("submit_starts_date") @db.Date
+  submitEndsDate           DateTime                 @map("submit_ends_date") @db.Date
+  postingGuide             String?                  @map("posting_guide") @db.VarChar(1024)
+  caution                  String?                  @db.VarChar(1024)
+  hashtag                  String?                  @db.VarChar(1024)
+  company                  String                   @db.VarChar(32)
+  managerName              String                   @map("manager_name") @db.VarChar(30)
+  managerTel               String                   @map("manager_tel") @db.VarChar(30)
+  managerEmail             String?                  @map("manager_email") @db.VarChar(50)
+  createdAt                DateTime                 @default(now()) @map("created_at") @db.DateTime(0)
+  updatedAt                DateTime                 @default(now()) @map("updated_at") @db.DateTime(0)
+  deletedAt                DateTime?                @map("deleted_at") @db.DateTime(0)
+  user                     User                     @relation(fields: [advertiserNo], references: [no], onDelete: Cascade, onUpdate: NoAction, map: "campaign_advertiser_no_FK")
+  brand                    Brand                    @relation(fields: [brandId], references: [id], onDelete: Cascade, map: "brand_id_FK")
+  campaignChannelCondition CampaignChannelCondition @relation(fields: [channelConditionId], references: [id], onDelete: NoAction, map: "campaign_channel_condition_id_FK")
+  campaignDeliveryInfo     CampaignDeliveryInfo?
+  campaignImage            CampaignImage[]
+  campaignOption           CampaignOption[]
+  campaignThumbnail        CampaignThumbnail?
+  campaignVisitingInfo     CampaignVisitingInfo?
 
   @@index([advertiserNo], map: "campaign_advertiser_no_FK")
   @@index([brandId], map: "campaign_brand_id_FK")
+  @@index([channelConditionId], map: "campaign_channel_condition_id_FK")
+  @@index([type], map: "campaign_type_IDX")
   @@map("campaign")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model CampaignChannelCondition {
+  id                    Int        @id @db.UnsignedInt
+  channel               Int        @db.UnsignedTinyInt
+  recruitment_condition Int        @db.UnsignedInt
+  createdAt             DateTime   @default(now()) @map("created_at") @db.DateTime(0)
+  updatedAt             DateTime   @default(now()) @map("updated_at") @db.DateTime(0)
+  campaign              Campaign[]
+
+  @@map("campaign_channel_condition")
+}
+
+model CampaignDeliveryInfo {
+  id                 Int       @id @default(autoincrement()) @db.UnsignedInt
+  campaignId         Int       @unique(map: "campaign_delivery_info_campaign_id_UNI") @map("campaign_id") @db.UnsignedInt
+  experienceEndsDate DateTime  @map("experience_ends_date") @db.Date
+  productPrice       Int       @map("product_price") @db.UnsignedInt
+  createdAt          DateTime  @default(now()) @map("created_at") @db.DateTime(0)
+  updatedAt          DateTime  @default(now()) @map("updated_at") @db.DateTime(0)
+  deletedAt          DateTime? @map("deleted_at") @db.DateTime(0)
+  campaign           Campaign  @relation(fields: [campaignId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "campaign_delivery_info_campaign_id_FK")
+}
+
+model CampaignImage {
+  id         Int       @id @default(autoincrement()) @db.UnsignedInt
+  campaignId Int       @map("campaign_id") @db.UnsignedInt
+  fileUrl    String    @map("file_url") @db.VarChar(256)
+  createdAt  DateTime  @default(now()) @map("created_at") @db.DateTime(0)
+  updatedAt  DateTime  @default(now()) @map("updated_at") @db.DateTime(0)
+  deletedAt  DateTime? @map("deleted_at") @db.DateTime(0)
+  campaign   Campaign  @relation(fields: [campaignId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "campaign_image_campaign_id_FK")
+
+  @@index([campaignId], map: "campaign_image_campaign_id_FK")
+  @@map("campaign_image")
+}
+
+model CampaignOption {
+  id         Int       @id @default(autoincrement()) @db.UnsignedInt
+  campaignId Int       @map("campaign_id") @db.UnsignedInt
+  name       String    @db.VarChar(50)
+  value      String    @db.VarChar(512)
+  createdAt  DateTime  @default(now()) @map("created_at") @db.DateTime(0)
+  updatedAt  DateTime  @default(now()) @map("updated_at") @db.DateTime(0)
+  deletedAt  DateTime? @map("deleted_at") @db.DateTime(0)
+  campaign   Campaign  @relation(fields: [campaignId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "campaign_option_campaign_id_FK")
+
+  @@index([campaignId], map: "campaign_option_campaign_id_FK")
+  @@map("campaign_option")
+}
+
+model CampaignThumbnail {
+  id         Int       @id @default(autoincrement()) @db.UnsignedInt
+  campaignId Int       @unique(map: "campaign_thumbnail_campaign_id_UNI") @map("campaign_id") @db.UnsignedInt
+  fileUrl    String    @map("file_url") @db.VarChar(256)
+  createdAt  DateTime  @default(now()) @map("created_at") @db.DateTime(0)
+  updatedAt  DateTime  @default(now()) @map("updated_at") @db.DateTime(0)
+  deletedAt  DateTime? @map("deleted_at") @db.DateTime(0)
+  campaign   Campaign  @relation(fields: [campaignId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "campaign_thumbnail_campaign_id_FK")
+
+  @@map("campaign_thumbnail")
+}
+
+model CampaignVisitingInfo {
+  id               Int       @id @default(autoincrement()) @db.UnsignedInt
+  campaignId       Int       @unique(map: "campaign_visiting_info_campaign_id_UNI") @map("campaign_id") @db.UnsignedInt
+  visitingAddr     String    @map("visiting_addr") @db.VarChar(100)
+  visitingTime     String    @map("visiting_time") @db.VarChar(512)
+  note             String    @db.VarChar(512)
+  visitingEndsDate DateTime  @map("visiting_ends_date") @db.Date
+  servicePrice     Int       @map("service_price") @db.UnsignedInt
+  createdAt        DateTime  @default(now()) @map("created_at") @db.DateTime(0)
+  updatedAt        DateTime  @default(now()) @map("updated_at") @db.DateTime(0)
+  deletedAt        DateTime? @map("deleted_at") @db.DateTime(0)
+  campaign         Campaign  @relation(fields: [campaignId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "campaign_visiting_info_campaign_id_FK")
+
+  @@map("campaign_visiting_info")
 }
