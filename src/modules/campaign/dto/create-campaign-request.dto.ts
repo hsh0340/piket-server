@@ -165,4 +165,11 @@ export class CreateCampaignRequestDto {
   @IsArray()
   @IsOptional()
   options: Array<{ name: string; values: Array<string> }> | null;
+
+  @IsString()
+  @IsNotEmpty()
+  thumbnail: string;
+
+  @IsArray()
+  images: string[] | null;
 }
