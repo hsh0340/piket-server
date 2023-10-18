@@ -24,6 +24,8 @@ export class CreateVisitingCampaignRequestDto extends PickType(
     'managerTel',
     'managerEmail',
     'options',
+    'thumbnail',
+    'images',
   ] as const,
 ) {
   visitingAddr: string;
