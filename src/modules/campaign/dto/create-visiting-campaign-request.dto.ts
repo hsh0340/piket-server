@@ -1,4 +1,4 @@
-import { PartialType, PickType } from '@nestjs/swagger';
+import { PickType } from '@nestjs/swagger';
 import { CreateCampaignRequestDto } from '@src/modules/campaign/dto/create-campaign-request.dto';
 
 export class CreateVisitingCampaignRequestDto extends PickType(
