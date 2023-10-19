@@ -36,6 +36,6 @@ export class CampaignController {
       advertiser,
       createVisitingCampaignRequestDto,
     );
-    return '캠페인 등록에 성공하였습니다.';
+    return '캠페인이 등록되었습니다.';
   }
 }
