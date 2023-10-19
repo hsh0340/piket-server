@@ -4,12 +4,16 @@ import helmet from 'helmet';
 import { HttpExceptionFilter } from '@src/common/filters/http-exception.filter';
 import { AppModule } from '@src/app.module';
 import { ValidationPipe } from '@src/common/pipes/validation.pipe';
+import { urlencoded, json } from 'body-parser';
 
 declare const module: any;
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   const configService = app.get(ConfigService);
+
+  app.use(json({ limit: '50mb' }));
+  app.use(urlencoded({ limit: '50mb', extended: true }));
 
   app.use(helmet());
   app.enableCors();
