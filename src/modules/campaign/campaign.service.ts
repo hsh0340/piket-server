@@ -56,16 +56,9 @@ export class CampaignService {
       ...rest
     } = createVisitingCampaignRequestDto;
 
-    const thumbnailFileName = this.getRandomFileName();
-    const imageFileNamesArray = [
-      this.getRandomFileName(),
-      this.getRandomFileName(),
-      this.getRandomFileName(),
-      this.getRandomFileName(),
-    ];
-    const imagesData: { campaignId: number; fileUrl: string }[] = [];
-
-    // 채널 모집조건 고유 코드 찾음
+    /*
+     * 채널과 모집 조건에 해당하는 코드를 DB 에서 찾고, 코드가 없으면 예외를 던집니다.
+     */
     const channelCondition =
       await this.prismaService.campaignChannelCondition.findFirst({
         select: {
@@ -80,6 +73,15 @@ export class CampaignService {
     if (!channelCondition) {
       throw new BadRequestException('채널과 모집조건이 유효하지 않습니다.');
     }
+
+    const thumbnailFileName = this.getRandomFileName();
+    const imageFileNamesArray = [
+      this.getRandomFileName(),
+      this.getRandomFileName(),
+      this.getRandomFileName(),
+      this.getRandomFileName(),
+    ];
+    const imagesData: { campaignId: number; fileUrl: string }[] = [];
 
     // 캠페인 공통 정보 테이블, 방문형 추가정보 테이블에 insert
     const campaign = await this.prismaService.campaign.create({
