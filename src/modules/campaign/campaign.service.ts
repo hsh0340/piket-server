@@ -37,6 +37,7 @@ export class CampaignService {
     createVisitingCampaignRequestDto: CreateVisitingCampaignRequestDto,
   ): Promise<void> {
     const {
+      brandId,
       channel,
       recruitmentCondition,
       recruitmentStartsDate,
@@ -74,6 +75,23 @@ export class CampaignService {
       throw new BadRequestException('채널과 모집조건이 유효하지 않습니다.');
     }
 
+    /*
+     * 존재하지 않는 브랜드의 경우 예외를 던집니다.
+     */
+    const existingBrand = this.prismaService.brand.findUnique({
+      select: {
+        id: true,
+      },
+      where: {
+        id: brandId,
+        advertiserNo: advertiser.no,
+      },
+    });
+
+    if (!existingBrand) {
+      throw new BadRequestException('존재하지 않는 브랜드입니다.');
+    }
+
     const thumbnailFileName = this.getRandomFileName();
     const imageFileNamesArray = [
       this.getRandomFileName(),
@@ -86,6 +104,7 @@ export class CampaignService {
     // 캠페인 공통 정보 테이블, 방문형 추가정보 테이블에 insert
     const campaign = await this.prismaService.campaign.create({
       data: {
+        brandId,
         advertiserNo: advertiser.no,
         channelConditionId: channelCondition.id,
         type: CampaignType.VISITING,
