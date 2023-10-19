@@ -28,11 +28,11 @@ export class CampaignController {
   @UseGuards(AuthGuard('jwt'), RolesGuard)
   @Roles(RoleType.ADVERTISER)
   @Post('visitings')
-  async createCampaign(
+  async createVisitingCampaign(
     @User() advertiser: UserEntity,
     @Body() createVisitingCampaignRequestDto: CreateVisitingCampaignRequestDto,
   ) {
-    await this.campaignService.createCampaign(
+    await this.campaignService.createVisitingCampaign(
       advertiser,
       createVisitingCampaignRequestDto,
     );
