@@ -72,6 +72,10 @@ jobs:
           echo EMAIL_HOST=${{ secrets.EMAIL_HOST }} >> .env
           echo EMAIL_AUTH_USER=${{ secrets.EMAIL_AUTH_USER }} >> .env
           echo EMAIL_AUTH_PASSWORD=${{ secrets.EMAIL_AUTH_PASSWORD }} >> .env
+          echo S3_ACCESS_KEY=${{ secrets.S3_ACCESS_KEY }} >> .env
+          echo S3_SECRET_ACCESS_KEY=${{ secrets.S3_SECRET_ACCESS_KEY }} >> .env
+          echo S3_REGION=${{ secrets.S3_REGION }} >> .env
+          echo S3_BUCKET=${{ secrets.S3_BUCKET }} >> .env
           echo PORT=${{ secrets.PORT }} >> .env
           cat .env
       # 3000 -> 80 포트로 수행하도록 지정
