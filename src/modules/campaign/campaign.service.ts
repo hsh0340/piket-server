@@ -56,63 +56,14 @@ export class CampaignService {
       ...rest
     } = createVisitingCampaignRequestDto;
 
-    try {
-      /*
-       * base64로 받아온 썸네일 이미지 파일을 디코딩합니다.
-       */
-      const thumbnailBuffer = Buffer.from(
-        thumbnail.replace(/^data:image\/\w+;base64,/, ''),
-        'base64',
-      );
-
-      /*
-       * 썸네일 파일을 S3에 업로드합니다.
-       */
-      await this.s3Client.send(
-        new PutObjectCommand({
-          Bucket: this.bucketName,
-          Key: `${advertiser.no + this.getRandomFileName()}.jpeg`,
-          Body: thumbnailBuffer,
-          ContentEncoding: 'base64',
-          ContentType: 'image/jpeg',
-        }),
-      );
-
-      /*
-       * images 배열이 null 이 아닌 경우 모든 원소를 디코딩 하여 새로운 배열에 추가합니다.
-       */
-      if (images && images.length > 0) {
-        const imagesBufferArr: Buffer[] = [];
-
-        images.forEach((image) => {
-          const imageBuffer = Buffer.from(
-            image.replace(/^data:image\/\w+;base64,/, ''),
-            'base64',
-          );
-
-          imagesBufferArr.push(imageBuffer);
-        });
-
-        /*
-         * 세부 이미지 파일들을 S3에 업로드 합니다.
-         */
-        imagesBufferArr.map(async (imageBuffer) => {
-          await this.s3Client.send(
-            new PutObjectCommand({
-              Bucket: this.bucketName,
-              Key: `${advertiser.no + this.getRandomFileName()}.jpeg`,
-              Body: imageBuffer,
-              ContentEncoding: 'base64',
-              ContentType: 'image/jpeg',
-            }),
-          );
-        });
-      }
-    } catch (err) {
-      throw new InternalServerErrorException(
-        '사진 파일을 S3에 저장하는 것을 실패하였습니다.',
-      );
-    }
+    const thumbnailFileName = this.getRandomFileName();
+    const imageFileNamesArray = [
+      this.getRandomFileName(),
+      this.getRandomFileName(),
+      this.getRandomFileName(),
+      this.getRandomFileName(),
+    ];
+    const imagesData: { campaignId: number; fileUrl: string }[] = [];
 
     // 채널 모집조건 고유 코드 찾음
     const channelCondition =
@@ -155,6 +106,76 @@ export class CampaignService {
       },
     });
 
+    try {
+      /*
+       * base64로 받아온 썸네일 이미지 파일을 디코딩합니다.
+       */
+      const thumbnailBuffer = Buffer.from(
+        thumbnail.replace(/^data:image\/\w+;base64,/, ''),
+        'base64',
+      );
+
+      /*
+       * 썸네일 파일을 S3에 업로드합니다.
+       */
+      await this.s3Client.send(
+        new PutObjectCommand({
+          Bucket: this.bucketName,
+          Key: `${advertiser.no + thumbnailFileName}.jpeg`,
+          Body: thumbnailBuffer,
+          ContentEncoding: 'base64',
+          ContentType: 'image/jpeg',
+        }),
+      );
+
+      /*
+       * images 배열이 null 이 아닌 경우 모든 원소를 디코딩 하여 imagesBuffer 배열에 추가합니다.
+       * images 파일 배열에도 저장합니다.
+       */
+      if (images && images.length > 0) {
+        const imagesBufferArr: Buffer[] = [];
+
+        images.forEach((image, index) => {
+          const imageBuffer = Buffer.from(
+            image.replace(/^data:image\/\w+;base64,/, ''),
+            'base64',
+          );
+
+          imagesBufferArr.push(imageBuffer);
+          imagesData.push({
+            campaignId: campaign.id,
+            fileUrl: `https://${
+              this.bucketName
+            }.s3.ap-northeast-2.amazonaws.com/${
+              advertiser.no + imageFileNamesArray[index]
+            }.jpeg`,
+          });
+        });
+
+        /*
+         * 세부 이미지 파일들을 S3에 업로드합니다.
+         */
+        imagesBufferArr.map(async (imageBuffer, index) => {
+          await this.s3Client.send(
+            new PutObjectCommand({
+              Bucket: this.bucketName,
+              Key: `${advertiser.no + imageFileNamesArray[index]}.jpeg`,
+              Body: imageBuffer,
+              ContentEncoding: 'base64',
+              ContentType: 'image/jpeg',
+            }),
+          );
+        });
+      }
+    } catch (err) {
+      throw new InternalServerErrorException(
+        '사진 파일을 S3에 저장하는 것을 실패하였습니다.',
+      );
+    }
+
+    /*
+     * 옵션 테이블에 캠페인 옵션을 저장합니다.
+     */
     if (options) {
       const output = options.map((obj) => {
         // value 속성을 JSON 문자열로 변환
@@ -168,5 +189,21 @@ export class CampaignService {
         data: output,
       });
     }
+
+    /*
+     * S3에 저장된 이미지 파일들의 객체 url 을 DB에 저장합니다.
+     */
+    await this.prismaService.campaignThumbnail.create({
+      data: {
+        campaignId: campaign.id,
+        fileUrl: `https://${this.bucketName}.s3.ap-northeast-2.amazonaws.com/${
+          advertiser.no + thumbnailFileName
+        }.jpeg`,
+      },
+    });
+
+    await this.prismaService.campaignImage.createMany({
+      data: imagesData,
+    });
   }
 }
