@@ -6,12 +6,13 @@ import {
 
 import { UserEntity } from '@src/entity/user.entity';
 import { CreateVisitingCampaignRequestDto } from '@src/modules/campaign/dto/create-visiting-campaign-request.dto';
-import { PrismaService } from '@src/modules/prisma/prisma.service';
+
 import { CampaignType } from '@src/common/constants/enum';
 import { PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
 import { ConfigService } from '@nestjs/config';
 import { CreateWritingCampaignRequestDto } from '@src/modules/campaign/dto/create-writing-campaign-request.dto';
 import { CreateCampaignRequestDto } from '@src/modules/campaign/dto/create-campaign-request.dto';
+import { PrismaService } from '@src/modules/prisma/prisma.service';
 
 @Injectable()
 export class CampaignService {
@@ -168,12 +169,13 @@ export class CampaignService {
    * @param advertiser 광고주 객체
    * @param campaignType 캠페인 진행 유형
    * @param createCampaignRequestDto 캠페인 셍성 DTO
+   * @return 생성된 캠페인의 고유 번호를 반환합니다.
    */
   async createCampaign(
     advertiser: UserEntity,
     campaignType: number,
     createCampaignRequestDto: CreateCampaignRequestDto,
-  ) {
+  ): Promise<number> {
     const {
       brandId,
       channel,
@@ -196,22 +198,20 @@ export class CampaignService {
 
     await this.verifyBrandExists(brandId, advertiser);
 
-    const commonCampaignData = {
-      brandId,
-      advertiserNo: advertiser.no,
-      channelConditionId,
-      type: campaignType,
-      recruitmentStartsDate: new Date(recruitmentStartsDate),
-      recruitmentEndsDate: new Date(recruitmentEndsDate),
-      selectionEndsDate: new Date(selectionEndsDate),
-      submitStartsDate: new Date(submitStartsDate),
-      submitEndsDate: new Date(submitEndsDate),
-      hashtag: JSON.stringify(hashtag),
-      ...rest,
-    };
-
     const campaign = await this.prismaService.campaign.create({
-      data: commonCampaignData,
+      data: {
+        brandId,
+        advertiserNo: advertiser.no,
+        channelConditionId,
+        type: CampaignType.VISITING,
+        recruitmentStartsDate: new Date(recruitmentStartsDate),
+        recruitmentEndsDate: new Date(recruitmentEndsDate),
+        selectionEndsDate: new Date(selectionEndsDate),
+        submitStartsDate: new Date(submitStartsDate),
+        submitEndsDate: new Date(submitEndsDate),
+        hashtag: JSON.stringify(hashtag),
+        ...rest,
+      },
     });
 
     const thumbnailFileName = advertiser.no + this.generateRandomFileName();
@@ -271,6 +271,19 @@ export class CampaignService {
         data: detailedImagesForDBInsertion,
       });
     } // end of if
+
+    return campaign.id;
+  }
+
+  createWritingCampaign(
+    advertiser: UserEntity,
+    createWritingCampaignRequestDto: CreateWritingCampaignRequestDto,
+  ) {
+    return this.createCampaign(
+      advertiser,
+      CampaignType.WRITING,
+      createWritingCampaignRequestDto,
+    );
   }
 
   async createVisitingCampaign(
@@ -295,6 +308,7 @@ export class CampaignService {
       options,
       thumbnail,
       images,
+      info,
       ...rest
     } = createVisitingCampaignRequestDto;
 
@@ -323,6 +337,7 @@ export class CampaignService {
         ...rest,
         campaignVisitingInfo: {
           create: {
+            info,
             visitingAddr,
             visitingTime,
             note,
