@@ -88,6 +88,25 @@ export class CampaignService {
     return;
   }
 
+  /**
+   * 옵션 배열 내의 각 객체에 campaign 고유 번호를 추가하고, 옵션 DB에 insert 하는 메서드
+   * @param options 옵션 배열
+   * @param campaign 캠페인 객체
+   */
+  async changeDataFormatOfOptionAndInsert(options, campaign) {
+    const formattedOptionArr = options.map((obj) => {
+      const valueString = JSON.stringify(obj.value);
+
+      return { name: obj.name, value: valueString, campaignId: campaign.id };
+    });
+
+    await this.prismaService.campaignOption.createMany({
+      data: formattedOptionArr,
+    });
+
+    return;
+  }
+
   async createVisitingCampaign(
     advertiser: UserEntity,
     createVisitingCampaignRequestDto: CreateVisitingCampaignRequestDto,
@@ -148,19 +167,8 @@ export class CampaignService {
       },
     });
 
-    /*
-     * 옵션이 존재하는 경우, 옵션 테이블에 데이터를 insert 합니다.
-     */
     if (options) {
-      const output = options.map((obj) => {
-        const valueString = JSON.stringify(obj.value);
-
-        return { name: obj.name, value: valueString, campaignId: campaign.id };
-      });
-
-      await this.prismaService.campaignOption.createMany({
-        data: output,
-      });
+      await this.changeDataFormatOfOptionAndInsert(options, campaign);
     }
 
     const thumbnailFileName = this.getRandomFileName();
