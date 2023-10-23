@@ -16,6 +16,7 @@ import { RoleType } from '@src/modules/auth/types/role-type';
 import { User } from '@src/modules/auth/decorators/user.decorator';
 import { UserEntity } from '@src/entity/user.entity';
 import { CreateVisitingCampaignRequestDto } from '@src/modules/campaign/dto/create-visiting-campaign-request.dto';
+import { CreateWritingCampaignRequestDto } from "@src/modules/campaign/dto/create-writing-campaign-request.dto";
 
 @UseInterceptors(ResponseSerializationInterceptor)
 @Controller('campaigns')
@@ -27,7 +28,7 @@ export class CampaignController {
    */
   @UseGuards(AuthGuard('jwt'), RolesGuard)
   @Roles(RoleType.ADVERTISER)
-  @Post('visitings')
+  @Post('visiting')
   async createVisitingCampaign(
     @User() advertiser: UserEntity,
     @Body() createVisitingCampaignRequestDto: CreateVisitingCampaignRequestDto,
@@ -35,6 +36,23 @@ export class CampaignController {
     await this.campaignService.createVisitingCampaign(
       advertiser,
       createVisitingCampaignRequestDto,
+    );
+    return '캠페인이 등록되었습니다.';
+  }
+
+  /*
+   * 기자단 캠페인 등록 API
+   */
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
+  @Roles(RoleType.ADVERTISER)
+  @Post('writing')
+  async createWritingCampaign(
+    @User() advertiser: UserEntity,
+    @Body() createWritingCampaignRequestDto: CreateWritingCampaignRequestDto,
+  ) {
+    await this.campaignService.createWritingCampaign(
+      advertiser,
+      createWritingCampaignRequestDto
     );
     return '캠페인이 등록되었습니다.';
   }
