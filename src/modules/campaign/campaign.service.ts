@@ -29,8 +29,24 @@ export class CampaignService {
     private readonly configService: ConfigService,
   ) {}
 
-  getRandomFileName() {
+  /**
+   * 랜덤한 파일명을 생성하는 메서드
+   * @return 랜덤한 문자열을 반환합니다.
+   */
+  generateRandomFileName() {
     return Math.random().toString(36).substring(2, 12);
+  }
+
+  /**
+   * 광고주 고유 번호와 파일명을 조합하여 S3 파일의 URL을 생성하는 메서드
+   * @param advertiserNo
+   * @param imageFileName
+   * @return S3 파일의 URL을 리턴합니다.
+   */
+  generateS3FileUrl(advertiserNo: number, imageFileName: string): string {
+    return `https://${this.bucketName}.s3.ap-northeast-2.amazonaws.com/${
+      advertiserNo + imageFileName
+    }.jpeg`;
   }
 
   /**
@@ -112,11 +128,38 @@ export class CampaignService {
    * @param base64Image
    * @return Buffer 객체를 반환합니다.
    */
-  decodeBase64Image(base64Image: string): Buffer {
+  decodeBase64ImageToBuffer(base64Image: string): Buffer {
     return Buffer.from(
       base64Image.replace(/^data:image\/\w+;base64,/, ''),
       'base64',
     );
+  }
+
+  /**
+   * S3에 이미지를 업로드하는 메서드
+   * @param fileName 파일명
+   * @param imageBuffer 이미지 Buffer 객체
+   * @return void
+   * @exception
+   */
+  async uploadImageToS3(fileName: string, imageBuffer: Buffer): Promise<void> {
+    try {
+      await this.s3Client.send(
+        new PutObjectCommand({
+          Bucket: this.bucketName,
+          Key: `${fileName}.jpeg`,
+          Body: imageBuffer,
+          ContentEncoding: 'base64',
+          ContentType: 'image/jpeg',
+        }),
+      );
+
+      return;
+    } catch (err) {
+      throw new InternalServerErrorException(
+        'S3에 파일 업로드를 실패하였습니다.',
+      );
+    }
   }
 
   async createVisitingCampaign(
@@ -183,75 +226,10 @@ export class CampaignService {
       await this.changeDataFormatOfOptionAndInsert(options, campaign);
     }
 
-    const thumbnailFileName = this.getRandomFileName();
-    const imageFileNamesArray = [
-      this.getRandomFileName(),
-      this.getRandomFileName(),
-      this.getRandomFileName(),
-      this.getRandomFileName(),
-    ];
-    const imagesData: { campaignId: number; fileUrl: string }[] = [];
+    const thumbnailFileName = advertiser.no + this.generateRandomFileName();
+    const thumbnailBuffer = this.decodeBase64ImageToBuffer(thumbnail);
 
-    try {
-      const thumbnailBuffer = this.decodeBase64Image(thumbnail);
-
-      /*
-       * 썸네일 파일을 S3에 업로드합니다.
-       */
-      await this.s3Client.send(
-        new PutObjectCommand({
-          Bucket: this.bucketName,
-          Key: `${advertiser.no + thumbnailFileName}.jpeg`,
-          Body: thumbnailBuffer,
-          ContentEncoding: 'base64',
-          ContentType: 'image/jpeg',
-        }),
-      );
-
-      /*
-       * images 배열이 null 이 아닌 경우 모든 원소를 디코딩 하여 imagesBuffer 배열에 추가합니다.
-       * images 파일 배열에도 저장합니다.
-       */
-      if (images && images.length > 0) {
-        const imagesBufferArr: Buffer[] = [];
-
-        images.forEach((image, index) => {
-          const imageBuffer = Buffer.from(
-            image.replace(/^data:image\/\w+;base64,/, ''),
-            'base64',
-          );
-
-          imagesBufferArr.push(imageBuffer);
-          imagesData.push({
-            campaignId: campaign.id,
-            fileUrl: `https://${
-              this.bucketName
-            }.s3.ap-northeast-2.amazonaws.com/${
-              advertiser.no + imageFileNamesArray[index]
-            }.jpeg`,
-          });
-        });
-
-        /*
-         * 세부 이미지 파일들을 S3에 업로드합니다.
-         */
-        imagesBufferArr.map(async (imageBuffer, index) => {
-          await this.s3Client.send(
-            new PutObjectCommand({
-              Bucket: this.bucketName,
-              Key: `${advertiser.no + imageFileNamesArray[index]}.jpeg`,
-              Body: imageBuffer,
-              ContentEncoding: 'base64',
-              ContentType: 'image/jpeg',
-            }),
-          );
-        });
-      }
-    } catch (err) {
-      throw new InternalServerErrorException(
-        '사진 파일을 S3에 저장하는 것을 실패하였습니다.',
-      );
-    }
+    await this.uploadImageToS3(thumbnailFileName, thumbnailBuffer);
 
     /*
      * S3에 저장된 이미지 파일들의 객체 url 을 DB에 저장합니다.
@@ -259,19 +237,51 @@ export class CampaignService {
     await this.prismaService.campaignThumbnail.create({
       data: {
         campaignId: campaign.id,
-        fileUrl: `https://${this.bucketName}.s3.ap-northeast-2.amazonaws.com/${
-          advertiser.no + thumbnailFileName
-        }.jpeg`,
+        fileUrl: this.generateS3FileUrl(advertiser.no, thumbnailFileName),
       },
     });
 
-    await this.prismaService.campaignImage.createMany({
-      data: imagesData,
-    });
-  }
+    if (images && images.length > 0) {
+      const detailedImageFileNamesArr = Array(images.length)
+        .fill('')
+        .map(() => advertiser.no + this.generateRandomFileName());
+      const detailedImagesForDBInsertion: {
+        campaignId: number;
+        fileUrl: string;
+      }[] = [];
+      const bufferedDetailedImagesArr: Buffer[] = [];
 
-  async createWritingCampaign(
-    advertiser: UserEntity,
-    createWritingCampaignRequestDto: CreateWritingCampaignRequestDto,
-  ) {}
+      images.forEach((detailedImage, index) => {
+        /*
+         * images 배열의 모든 원소를 디코딩 하여 bufferedDetailedImagesArr 배열에 push 합니다.
+         */
+        const imageBuffer = this.decodeBase64ImageToBuffer(detailedImage);
+
+        bufferedDetailedImagesArr.push(imageBuffer);
+
+        /*
+         * prisma createMany의 data 절에서 사용하기 위한 detailedImagesForInsertion 배열에 키 값이 campaignId, fileUrl 인 객체를 push 합니다.
+         */
+
+        detailedImagesForDBInsertion.push({
+          campaignId: campaign.id,
+          fileUrl: this.generateS3FileUrl(
+            advertiser.no,
+            detailedImageFileNamesArr[index],
+          ),
+        });
+      }); // end of forEach
+
+      bufferedDetailedImagesArr.map(async (bufferedImage, index) => {
+        await this.uploadImageToS3(
+          detailedImageFileNamesArr[index],
+          bufferedImage,
+        );
+      });
+
+      await this.prismaService.campaignImage.createMany({
+        data: detailedImagesForDBInsertion,
+      });
+    } // end of if
+  }
 }
