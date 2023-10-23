@@ -77,7 +77,6 @@ model Campaign {
   brandId                  Int                      @map("brand_id") @db.UnsignedInt
   channelConditionId       Int                      @map("channel_condition_id") @db.UnsignedInt
   title                    String                   @db.VarChar(128)
-  info                     String                   @db.VarChar(64)
   type                     Int                      @db.UnsignedTinyInt
   reward                   Int                      @db.UnsignedInt
   recruitment              Int                      @db.UnsignedInt
@@ -179,6 +178,7 @@ model CampaignThumbnail {
 model CampaignVisitingInfo {
   id               Int       @id @default(autoincrement()) @db.UnsignedInt
   campaignId       Int       @unique(map: "campaign_visiting_info_campaign_id_UNI") @map("campaign_id") @db.UnsignedInt
+  info             String    @db.VarChar(64)
   visitingAddr     String    @map("visiting_addr") @db.VarChar(100)
   visitingTime     String    @map("visiting_time") @db.VarChar(512)
   note             String    @db.VarChar(512)
