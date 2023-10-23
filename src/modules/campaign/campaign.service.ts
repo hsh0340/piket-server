@@ -92,16 +92,9 @@ export class CampaignService {
       throw new BadRequestException('존재하지 않는 브랜드입니다.');
     }
 
-    const thumbnailFileName = this.getRandomFileName();
-    const imageFileNamesArray = [
-      this.getRandomFileName(),
-      this.getRandomFileName(),
-      this.getRandomFileName(),
-      this.getRandomFileName(),
-    ];
-    const imagesData: { campaignId: number; fileUrl: string }[] = [];
-
-    // 캠페인 공통 정보 테이블, 방문형 추가정보 테이블에 insert
+    /*
+     * 캠페인 기본정보와, 방문형 캠페인 추가정보를 DB에 insert 합니다.
+     */
     const campaign = await this.prismaService.campaign.create({
       data: {
         brandId,
@@ -126,6 +119,30 @@ export class CampaignService {
         },
       },
     });
+
+    /*
+     * 옵션이 존재하는 경우, 옵션 테이블에 데이터를 insert 합니다.
+     */
+    if (options) {
+      const output = options.map((obj) => {
+        const valueString = JSON.stringify(obj.value);
+
+        return { name: obj.name, value: valueString, campaignId: campaign.id };
+      });
+
+      await this.prismaService.campaignOption.createMany({
+        data: output,
+      });
+    }
+
+    const thumbnailFileName = this.getRandomFileName();
+    const imageFileNamesArray = [
+      this.getRandomFileName(),
+      this.getRandomFileName(),
+      this.getRandomFileName(),
+      this.getRandomFileName(),
+    ];
+    const imagesData: { campaignId: number; fileUrl: string }[] = [];
 
     try {
       /*
@@ -195,23 +212,6 @@ export class CampaignService {
     }
 
     /*
-     * 옵션 테이블에 캠페인 옵션을 저장합니다.
-     */
-    if (options) {
-      const output = options.map((obj) => {
-        // value 속성을 JSON 문자열로 변환
-        const valueString = JSON.stringify(obj.value);
-
-        // 변환된 객체를 반환
-        return { name: obj.name, value: valueString, campaignId: campaign.id };
-      });
-
-      await this.prismaService.campaignOption.createMany({
-        data: output,
-      });
-    }
-
-    /*
      * S3에 저장된 이미지 파일들의 객체 url 을 DB에 저장합니다.
      */
     await this.prismaService.campaignThumbnail.create({
@@ -227,4 +227,6 @@ export class CampaignService {
       data: imagesData,
     });
   }
+
+  async createWritingCampaign(advertiser, createWritingCampaignRequestDto) {}
 }
