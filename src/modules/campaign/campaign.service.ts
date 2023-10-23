@@ -109,13 +109,13 @@ export class CampaignService {
   /**
    * 옵션 배열 내의 각 객체에 campaign 고유 번호를 추가하고, 옵션 DB에 insert 하는 메서드
    * @param options 옵션 배열
-   * @param campaign 캠페인 객체
+   * @param campaignId 캠페인 고유 번호
    */
-  async changeDataFormatOfOptionAndInsert(options, campaign) {
+  async changeDataFormatOfOptionAndInsert(options, campaignId: number) {
     const formattedOptionArr = options.map((obj) => {
       const valueString = JSON.stringify(obj.value);
 
-      return { name: obj.name, value: valueString, campaignId: campaign.id };
+      return { name: obj.name, value: valueString, campaignId };
     });
 
     await this.prismaService.campaignOption.createMany({
@@ -291,123 +291,37 @@ export class CampaignService {
     createVisitingCampaignRequestDto: CreateVisitingCampaignRequestDto,
   ): Promise<void> {
     const {
-      brandId,
-      channel,
-      recruitmentCondition,
-      recruitmentStartsDate,
-      recruitmentEndsDate,
-      selectionEndsDate,
-      submitStartsDate,
-      submitEndsDate,
+      options,
       visitingAddr,
       visitingTime,
       note,
       visitingEndsDate,
       servicePrice,
-      hashtag,
-      options,
-      thumbnail,
-      images,
       info,
-      ...rest
+      ...createCampaignRequestDto
     } = createVisitingCampaignRequestDto;
 
-    const channelConditionId = await this.getChannelConditionCode(
-      channel,
-      recruitmentCondition,
+    const campaignId = await this.createCampaign(
+      advertiser,
+      CampaignType.VISITING,
+      createCampaignRequestDto,
     );
 
-    await this.verifyBrandExists(brandId, advertiser);
-
-    /*
-     * 캠페인 기본정보와, 방문형 캠페인 추가정보를 DB에 insert 합니다.
-     */
-    const campaign = await this.prismaService.campaign.create({
-      data: {
-        brandId,
-        advertiserNo: advertiser.no,
-        channelConditionId,
-        type: CampaignType.VISITING,
-        recruitmentStartsDate: new Date(recruitmentStartsDate),
-        recruitmentEndsDate: new Date(recruitmentEndsDate),
-        selectionEndsDate: new Date(selectionEndsDate),
-        submitStartsDate: new Date(submitStartsDate),
-        submitEndsDate: new Date(submitEndsDate),
-        hashtag: JSON.stringify(hashtag),
-        ...rest,
-        campaignVisitingInfo: {
-          create: {
-            info,
-            visitingAddr,
-            visitingTime,
-            note,
-            visitingEndsDate: new Date(visitingEndsDate),
-            servicePrice,
-          },
-        },
-      },
-    });
-
     if (options) {
-      await this.changeDataFormatOfOptionAndInsert(options, campaign);
+      await this.changeDataFormatOfOptionAndInsert(options, campaignId);
     }
 
-    const thumbnailFileName = advertiser.no + this.generateRandomFileName();
-    const thumbnailBuffer = this.decodeBase64ImageToBuffer(thumbnail);
-
-    await this.uploadImageToS3(thumbnailFileName, thumbnailBuffer);
-
-    /*
-     * S3에 저장된 이미지 파일들의 객체 url 을 DB에 저장합니다.
-     */
-    await this.prismaService.campaignThumbnail.create({
+    // 방문형 캠페인 추가정보 insert
+    await this.prismaService.campaignVisitingInfo.create({
       data: {
-        campaignId: campaign.id,
-        fileUrl: this.generateS3FileUrl(advertiser.no, thumbnailFileName),
+        campaignId,
+        visitingAddr,
+        visitingTime,
+        note,
+        visitingEndsDate: new Date(visitingEndsDate),
+        servicePrice,
+        info,
       },
     });
-
-    if (images && images.length > 0) {
-      const detailedImageFileNamesArr = Array(images.length)
-        .fill('')
-        .map(() => advertiser.no + this.generateRandomFileName());
-      const detailedImagesForDBInsertion: {
-        campaignId: number;
-        fileUrl: string;
-      }[] = [];
-      const bufferedDetailedImagesArr: Buffer[] = [];
-
-      images.forEach((detailedImage, index) => {
-        /*
-         * images 배열의 모든 원소를 디코딩 하여 bufferedDetailedImagesArr 배열에 push 합니다.
-         */
-        const imageBuffer = this.decodeBase64ImageToBuffer(detailedImage);
-
-        bufferedDetailedImagesArr.push(imageBuffer);
-
-        /*
-         * prisma createMany의 data 절에서 사용하기 위한 detailedImagesForInsertion 배열에 키 값이 campaignId, fileUrl 인 객체를 push 합니다.
-         */
-
-        detailedImagesForDBInsertion.push({
-          campaignId: campaign.id,
-          fileUrl: this.generateS3FileUrl(
-            advertiser.no,
-            detailedImageFileNamesArr[index],
-          ),
-        });
-      }); // end of forEach
-
-      bufferedDetailedImagesArr.map(async (bufferedImage, index) => {
-        await this.uploadImageToS3(
-          detailedImageFileNamesArr[index],
-          bufferedImage,
-        );
-      });
-
-      await this.prismaService.campaignImage.createMany({
-        data: detailedImagesForDBInsertion,
-      });
-    } // end of if
   }
 }
