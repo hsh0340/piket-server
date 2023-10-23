@@ -11,6 +11,7 @@ import { CampaignType } from '@src/common/constants/enum';
 import { PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
 import { ConfigService } from '@nestjs/config';
 import { CreateWritingCampaignRequestDto } from '@src/modules/campaign/dto/create-writing-campaign-request.dto';
+import { CreateCampaignRequestDto } from '@src/modules/campaign/dto/create-campaign-request.dto';
 
 @Injectable()
 export class CampaignService {
@@ -160,6 +161,116 @@ export class CampaignService {
         'S3에 파일 업로드를 실패하였습니다.',
       );
     }
+  }
+
+  /**
+   * 배송형/방문형/기자단 캠페인 등록시 공통으로 실행될 메서드
+   * @param advertiser 광고주 객체
+   * @param campaignType 캠페인 진행 유형
+   * @param createCampaignRequestDto 캠페인 셍성 DTO
+   */
+  async createCampaign(
+    advertiser: UserEntity,
+    campaignType: number,
+    createCampaignRequestDto: CreateCampaignRequestDto,
+  ) {
+    const {
+      brandId,
+      channel,
+      recruitmentCondition,
+      recruitmentStartsDate,
+      recruitmentEndsDate,
+      selectionEndsDate,
+      submitStartsDate,
+      submitEndsDate,
+      hashtag,
+      thumbnail,
+      images,
+      ...rest
+    } = createCampaignRequestDto;
+
+    const channelConditionId = await this.getChannelConditionCode(
+      channel,
+      recruitmentCondition,
+    );
+
+    await this.verifyBrandExists(brandId, advertiser);
+
+    const commonCampaignData = {
+      brandId,
+      advertiserNo: advertiser.no,
+      channelConditionId,
+      type: campaignType,
+      recruitmentStartsDate: new Date(recruitmentStartsDate),
+      recruitmentEndsDate: new Date(recruitmentEndsDate),
+      selectionEndsDate: new Date(selectionEndsDate),
+      submitStartsDate: new Date(submitStartsDate),
+      submitEndsDate: new Date(submitEndsDate),
+      hashtag: JSON.stringify(hashtag),
+      ...rest,
+    };
+
+    const campaign = await this.prismaService.campaign.create({
+      data: commonCampaignData,
+    });
+
+    const thumbnailFileName = advertiser.no + this.generateRandomFileName();
+    const thumbnailBuffer = this.decodeBase64ImageToBuffer(thumbnail);
+
+    await this.uploadImageToS3(thumbnailFileName, thumbnailBuffer);
+
+    /*
+     * S3에 저장된 이미지 파일들의 객체 url 을 DB에 저장합니다.
+     */
+    await this.prismaService.campaignThumbnail.create({
+      data: {
+        campaignId: campaign.id,
+        fileUrl: this.generateS3FileUrl(advertiser.no, thumbnailFileName),
+      },
+    });
+
+    if (images && images.length > 0) {
+      const detailedImageFileNamesArr = Array(images.length)
+        .fill('')
+        .map(() => advertiser.no + this.generateRandomFileName());
+      const detailedImagesForDBInsertion: {
+        campaignId: number;
+        fileUrl: string;
+      }[] = [];
+      const bufferedDetailedImagesArr: Buffer[] = [];
+
+      images.forEach((detailedImage, index) => {
+        /*
+         * images 배열의 모든 원소를 디코딩 하여 bufferedDetailedImagesArr 배열에 push 합니다.
+         */
+        const imageBuffer = this.decodeBase64ImageToBuffer(detailedImage);
+
+        bufferedDetailedImagesArr.push(imageBuffer);
+
+        /*
+         * prisma createMany의 data 절에서 사용하기 위한 detailedImagesForInsertion 배열에 키 값이 campaignId, fileUrl 인 객체를 push 합니다.
+         */
+
+        detailedImagesForDBInsertion.push({
+          campaignId: campaign.id,
+          fileUrl: this.generateS3FileUrl(
+            advertiser.no,
+            detailedImageFileNamesArr[index],
+          ),
+        });
+      }); // end of forEach
+
+      bufferedDetailedImagesArr.map(async (bufferedImage, index) => {
+        await this.uploadImageToS3(
+          detailedImageFileNamesArr[index],
+          bufferedImage,
+        );
+      });
+
+      await this.prismaService.campaignImage.createMany({
+        data: detailedImagesForDBInsertion,
+      });
+    } // end of if
   }
 
   async createVisitingCampaign(
