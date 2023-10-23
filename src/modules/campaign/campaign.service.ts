@@ -61,6 +61,33 @@ export class CampaignService {
     return channelConditionCode.id;
   }
 
+  /**
+   * 브랜드가 존재하는지 확인하는 메서드
+   * @param brandId 브랜드 고유 번호
+   * @param advertiser 광고주 정보
+   * @return void
+   */
+  async verifyBrandExists(
+    brandId: number,
+    advertiser: UserEntity,
+  ): Promise<void> {
+    const existingBrand = await this.prismaService.brand.findUnique({
+      select: {
+        id: true,
+      },
+      where: {
+        id: brandId,
+        advertiserNo: advertiser.no,
+      },
+    });
+
+    if (!existingBrand) {
+      throw new BadRequestException('존재하지 않는 브랜드입니다.');
+    }
+
+    return;
+  }
+
   async createVisitingCampaign(
     advertiser: UserEntity,
     createVisitingCampaignRequestDto: CreateVisitingCampaignRequestDto,
@@ -91,22 +118,7 @@ export class CampaignService {
       recruitmentCondition,
     );
 
-    /*
-     * 존재하지 않는 브랜드의 경우 예외를 던집니다.
-     */
-    const existingBrand = this.prismaService.brand.findUnique({
-      select: {
-        id: true,
-      },
-      where: {
-        id: brandId,
-        advertiserNo: advertiser.no,
-      },
-    });
-
-    if (!existingBrand) {
-      throw new BadRequestException('존재하지 않는 브랜드입니다.');
-    }
+    await this.verifyBrandExists(brandId, advertiser);
 
     /*
      * 캠페인 기본정보와, 방문형 캠페인 추가정보를 DB에 insert 합니다.
