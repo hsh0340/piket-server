@@ -12,7 +12,6 @@ import {
 import {
   CampaignChannel,
   CampaignRecruitmentCondition,
-  CampaignType,
 } from '@src/common/constants/enum';
 
 /**
@@ -20,7 +19,6 @@ import {
  * @property brandId {number} 브랜드 고유번호
  * @property title {string} 캠페인 제목
  * @property info {string} 상품정보
- * @property type {string} 진행방식 // 업성도됨
  * @property reward {number} 리워드
  * @property channel {number} 진행채널
  * @property recruitment {number} 모집인원
