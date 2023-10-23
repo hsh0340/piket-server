@@ -107,6 +107,18 @@ export class CampaignService {
     return;
   }
 
+  /**
+   * base64 로 인코딩 된 이미지를 Buffer 객체로 디코딩하는 메서드
+   * @param base64Image
+   * @return Buffer 객체를 반환합니다.
+   */
+  decodeBase64Image(base64Image: string): Buffer {
+    return Buffer.from(
+      base64Image.replace(/^data:image\/\w+;base64,/, ''),
+      'base64',
+    );
+  }
+
   async createVisitingCampaign(
     advertiser: UserEntity,
     createVisitingCampaignRequestDto: CreateVisitingCampaignRequestDto,
@@ -181,13 +193,7 @@ export class CampaignService {
     const imagesData: { campaignId: number; fileUrl: string }[] = [];
 
     try {
-      /*
-       * base64로 받아온 썸네일 이미지 파일을 디코딩합니다.
-       */
-      const thumbnailBuffer = Buffer.from(
-        thumbnail.replace(/^data:image\/\w+;base64,/, ''),
-        'base64',
-      );
+      const thumbnailBuffer = this.decodeBase64Image(thumbnail);
 
       /*
        * 썸네일 파일을 S3에 업로드합니다.
