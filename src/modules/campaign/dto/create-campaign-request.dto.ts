@@ -18,7 +18,6 @@ import {
  * 캠페인 진행방식에 상관 없이 공통으로 필요한 데이터 DTO
  * @property brandId {number} 브랜드 고유번호
  * @property title {string} 캠페인 제목
- * @property info {string} 상품정보
  * @property reward {number} 리워드
  * @property channel {number} 진행채널
  * @property recruitment {number} 모집인원
@@ -35,7 +34,6 @@ import {
  * @property managerName {string} 담당자명
  * @property managerTel {string} 전화번호
  * @property managerEmail {string | null} 이메일
- * @property options {Array<{ name: string; values: Array<string> }> | null} 옵션 배열
  */
 export class CreateCampaignRequestDto {
   @IsNotEmpty()
@@ -49,18 +47,6 @@ export class CreateCampaignRequestDto {
   @IsNotEmpty()
   @IsString()
   title: string;
-
-  /*
-   * 띄어쓰기 불가
-   * 30자 까지 작성 가능
-   */
-  @IsNotEmpty()
-  @IsString()
-  info: string;
-
-  // @IsNotEmpty()
-  // @IsEnum(CampaignType)
-  // type: number;
 
   /*
    * 최대 9자리
@@ -156,13 +142,6 @@ export class CreateCampaignRequestDto {
   @IsString()
   @IsOptional()
   managerEmail: string | null;
-
-  /*
-   * 옵션 3개 까지만 등록 가능
-   */
-  @IsArray()
-  @IsOptional()
-  options: Array<{ name: string; value: Array<string> }> | null;
 
   @IsString()
   @IsNotEmpty()
