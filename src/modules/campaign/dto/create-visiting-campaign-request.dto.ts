@@ -1,8 +1,8 @@
 import { PickType } from '@nestjs/swagger';
 import { CreateCampaignRequestDto } from '@src/modules/campaign/dto/create-campaign-request.dto';
+import { IsArray, IsOptional, IsNotEmpty, IsString } from 'class-validator';
 
 /**
- * 캠페인 진행방식에 상관 없이 공통으로 필요한 데이터 DTO
  * @property brandId {number} 브랜드 고유번호
  * @property title {string} 캠페인 제목
  * @property info {string} 상품정보
@@ -34,7 +34,6 @@ export class CreateVisitingCampaignRequestDto extends PickType(
   [
     'brandId',
     'title',
-    'info',
     'reward',
     'channel',
     'recruitment',
@@ -51,7 +50,6 @@ export class CreateVisitingCampaignRequestDto extends PickType(
     'managerName',
     'managerTel',
     'managerEmail',
-    'options',
     'thumbnail',
     'images',
   ] as const,
@@ -61,4 +59,18 @@ export class CreateVisitingCampaignRequestDto extends PickType(
   note: string;
   visitingEndsDate: string;
   servicePrice: number;
+  /*
+   * 옵션 3개 까지만 등록 가능
+   */
+  @IsArray()
+  @IsOptional()
+  options: Array<{ name: string; value: Array<string> }> | null;
+
+  /*
+   * 띄어쓰기 불가
+   * 30자 까지 작성 가능
+   */
+  @IsNotEmpty()
+  @IsString()
+  info: string;
 }
