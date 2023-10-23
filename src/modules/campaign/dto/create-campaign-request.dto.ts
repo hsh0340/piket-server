@@ -34,6 +34,8 @@ import {
  * @property managerName {string} 담당자명
  * @property managerTel {string} 전화번호
  * @property managerEmail {string | null} 이메일
+ * @property thumbnail {string} 썸네일 base64
+ * @property images {string[] | null} 세부이미지 base64 배열
  */
 export class CreateCampaignRequestDto {
   @IsNotEmpty()
