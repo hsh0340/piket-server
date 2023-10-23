@@ -10,6 +10,7 @@ import { PrismaService } from '@src/modules/prisma/prisma.service';
 import { CampaignType } from '@src/common/constants/enum';
 import { PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
 import { ConfigService } from '@nestjs/config';
+import { CreateWritingCampaignRequestDto } from '@src/modules/campaign/dto/create-writing-campaign-request.dto';
 
 @Injectable()
 export class CampaignService {
@@ -30,6 +31,34 @@ export class CampaignService {
 
   getRandomFileName() {
     return Math.random().toString(36).substring(2, 12);
+  }
+
+  /**
+   * 모집 채널과 모집 조건을 입력받아 모집 고유 코드를 조회하는 메서드
+   * @param channel 모집 채널
+   * @param recruitmentCondition 모집 조건
+   * @return 모집 고유 코드를 반환합니다.
+   */
+  async getChannelConditionCode(
+    channel: number,
+    recruitmentCondition: number,
+  ): Promise<number> {
+    const channelConditionCode =
+      await this.prismaService.campaignChannelCondition.findFirst({
+        select: {
+          id: true,
+        },
+        where: {
+          channel,
+          recruitmentCondition,
+        },
+      });
+
+    if (!channelConditionCode) {
+      throw new BadRequestException('채널과 모집조건이 유효하지 않습니다.');
+    }
+
+    return channelConditionCode.id;
   }
 
   async createVisitingCampaign(
@@ -57,23 +86,10 @@ export class CampaignService {
       ...rest
     } = createVisitingCampaignRequestDto;
 
-    /*
-     * 채널과 모집 조건에 해당하는 코드를 DB 에서 찾고, 코드가 없으면 예외를 던집니다.
-     */
-    const channelCondition =
-      await this.prismaService.campaignChannelCondition.findFirst({
-        select: {
-          id: true,
-        },
-        where: {
-          channel,
-          recruitmentCondition,
-        },
-      });
-
-    if (!channelCondition) {
-      throw new BadRequestException('채널과 모집조건이 유효하지 않습니다.');
-    }
+    const channelConditionId = await this.getChannelConditionCode(
+      channel,
+      recruitmentCondition,
+    );
 
     /*
      * 존재하지 않는 브랜드의 경우 예외를 던집니다.
@@ -99,7 +115,7 @@ export class CampaignService {
       data: {
         brandId,
         advertiserNo: advertiser.no,
-        channelConditionId: channelCondition.id,
+        channelConditionId,
         type: CampaignType.VISITING,
         recruitmentStartsDate: new Date(recruitmentStartsDate),
         recruitmentEndsDate: new Date(recruitmentEndsDate),
@@ -228,5 +244,8 @@ export class CampaignService {
     });
   }
 
-  async createWritingCampaign(advertiser, createWritingCampaignRequestDto) {}
+  async createWritingCampaign(
+    advertiser: UserEntity,
+    createWritingCampaignRequestDto: CreateWritingCampaignRequestDto,
+  ) {}
 }
