@@ -141,3 +141,23 @@ export class BrandNotUpdatedException extends BaseException {
     this.message = '브랜드 업데이트에 실패하였습니다.';
   }
 }
+
+export class ChannelConditionMismatchException extends BaseException {
+  constructor() {
+    super(
+      RequestExceptionCodeEnum.ChannelConditionMismatch,
+      HttpStatus.BAD_REQUEST,
+    );
+    this.message = '진행채널과 모집조건이 유효하지 않습니다.';
+  }
+}
+
+export class CampaignNotCreatedException extends BaseException {
+  constructor() {
+    super(
+      RequestExceptionCodeEnum.CampaignNotCreated,
+      HttpStatus.INTERNAL_SERVER_ERROR,
+    );
+    this.message = '캠페인 생성에 실패하였습니다.';
+  }
+}
