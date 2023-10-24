@@ -126,6 +126,7 @@ model CampaignChannelCondition {
 model CampaignDeliveryInfo {
   id                 Int       @id @default(autoincrement()) @db.UnsignedInt
   campaignId         Int       @unique(map: "campaign_delivery_info_campaign_id_UNI") @map("campaign_id") @db.UnsignedInt
+  info               String    @db.VarChar(64)
   experienceEndsDate DateTime  @map("experience_ends_date") @db.Date
   productPrice       Int       @map("product_price") @db.UnsignedInt
   createdAt          DateTime  @default(now()) @map("created_at") @db.DateTime(0)
