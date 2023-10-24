@@ -68,3 +68,43 @@ export interface CreateVisitingCampaignInput {
     };
   };
 }
+
+export interface CreateDeliveryCampaignInput {
+  brandId: number;
+  advertiserNo: number;
+  title: string;
+  reward: number;
+  channelConditionId: number;
+  postingGuide: string | null;
+  caution: string | null;
+  type: number;
+  recruitment: number;
+  recruitmentStartsDate: Date;
+  recruitmentEndsDate: Date;
+  selectionEndsDate: Date;
+  submitStartsDate: Date;
+  submitEndsDate: Date;
+  hashtag: string;
+  company: string;
+  managerName: string;
+  managerTel: string;
+  managerEmail: string | null;
+  campaignDeliveryInfo: {
+    create: {
+      experienceEndsDate: Date;
+      productPrice: number;
+      info: string;
+    };
+  };
+  campaignThumbnail: { create: { fileUrl: string } };
+  campaignImage?: {
+    createMany: {
+      data: { fileUrl: string }[];
+    };
+  };
+  campaignOption?: {
+    createMany: {
+      data: { name: string; value: string }[];
+    };
+  };
+}
