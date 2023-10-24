@@ -161,3 +161,13 @@ export class CampaignNotCreatedException extends BaseException {
     this.message = '캠페인 생성에 실패하였습니다.';
   }
 }
+
+export class S3NotUploadedException extends BaseException {
+  constructor() {
+    super(
+      RequestExceptionCodeEnum.S3NotUploaded,
+      HttpStatus.INTERNAL_SERVER_ERROR,
+    );
+    this.message = 'S3에 파일 업로드를 실패하였습니다.';
+  }
+}
