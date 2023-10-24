@@ -1,6 +1,6 @@
 import { PickType } from '@nestjs/swagger';
 import { CreateCampaignRequestDto } from '@src/modules/campaign/dto/create-campaign-request.dto';
-import { IsArray, IsOptional } from 'class-validator';
+import { IsArray, IsNotEmpty, IsOptional, IsString } from "class-validator";
 
 /**
  * @property brandId {number} 브랜드 고유번호
@@ -55,4 +55,12 @@ export class CreateDeliveryCampaignRequestDto extends PickType(
   @IsArray()
   @IsOptional()
   options: Array<{ name: string; value: Array<string> }> | null;
+
+  /*
+   * 띄어쓰기 불가
+   * 30자 까지 작성 가능
+   */
+  @IsNotEmpty()
+  @IsString()
+  info: string;
 }
