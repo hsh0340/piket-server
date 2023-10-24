@@ -3,22 +3,20 @@ import {
   Injectable,
   InternalServerErrorException,
 } from '@nestjs/common';
-
-import { UserEntity } from '@src/entity/user.entity';
-import { CreateVisitingCampaignRequestDto } from '@src/modules/campaign/dto/create-visiting-campaign-request.dto';
-
-import { CampaignType } from '@src/common/constants/enum';
 import { PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
 import { ConfigService } from '@nestjs/config';
+import { PrismaService } from '@src/modules/prisma/prisma.service';
+import { UserEntity } from '@src/entity/user.entity';
+import { CreateVisitingCampaignRequestDto } from '@src/modules/campaign/dto/create-visiting-campaign-request.dto';
+import { CampaignType } from '@src/common/constants/enum';
 import { CreateWritingCampaignRequestDto } from '@src/modules/campaign/dto/create-writing-campaign-request.dto';
 import { CreateCampaignRequestDto } from '@src/modules/campaign/dto/create-campaign-request.dto';
-import { PrismaService } from '@src/modules/prisma/prisma.service';
+import { CreateDeliveryCampaignRequestDto } from '@src/modules/campaign/dto/create-delivery-campaign-request.dto';
 import {
   CreateCommonCampaignInput,
   CreateDeliveryCampaignInput,
   CreateVisitingCampaignInput,
 } from '@src/modules/campaign/interfaces/campaign.interface';
-import { CreateDeliveryCampaignRequestDto } from '@src/modules/campaign/dto/create-delivery-campaign-request.dto';
 
 @Injectable()
 export class CampaignService {
@@ -328,7 +326,6 @@ export class CampaignService {
       };
     }
 
-    // 최종적으로
     try {
       await this.prismaService.campaign.create({
         data: inputObjectForCreateVisitingCampaign,
