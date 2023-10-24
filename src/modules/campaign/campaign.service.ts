@@ -20,7 +20,7 @@ import {
 import {
   BrandNotExistsException,
   CampaignNotCreatedException,
-  ChannelConditionMismatchException
+  ChannelConditionMismatchException, S3NotUploadedException
 } from "@src/common/exceptions/request.exception";
 
 @Injectable()
@@ -161,14 +161,12 @@ export class CampaignService {
 
       return;
     } catch (err) {
-      throw new InternalServerErrorException(
-        'S3에 파일 업로드를 실패하였습니다.',
-      );
+      throw new S3NotUploadedException();
     }
   }
 
   /**
-   * 배송형/방문형/기자단 캠페인 create 메서드에서 공통으로 필요한 데이터를 포함한 객체를 생성하고, 공통적으로 실행해야할 로직을 포함한 메서드
+   * 배송형/방문형/기자단 캠페인 create 메서드에서 공통으로 필요한 데이터를 포함한 객체를패 생성하고, 공통적으로 실행해야할 로직을 포함한 메서드
    * @param advertiser 광고주 객체
    * @param campaignType 캠페인 진행 유형
    * @param createCampaignRequestDto 캠페인 생성 DTO
