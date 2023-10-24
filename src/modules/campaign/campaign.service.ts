@@ -1,8 +1,4 @@
-import {
-  BadRequestException,
-  Injectable,
-  InternalServerErrorException,
-} from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
 import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '@src/modules/prisma/prisma.service';
@@ -20,8 +16,9 @@ import {
 import {
   BrandNotExistsException,
   CampaignNotCreatedException,
-  ChannelConditionMismatchException, S3NotUploadedException
-} from "@src/common/exceptions/request.exception";
+  ChannelConditionMismatchException,
+  S3NotUploadedException,
+} from '@src/common/exceptions/request.exception';
 
 @Injectable()
 export class CampaignService {
