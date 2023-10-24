@@ -34,9 +34,13 @@ export enum RequestExceptionCodeEnum {
   NoBrandInfoUpdated = '3015',
   // 브랜드 업데이트에 실패하였습니다. : 3016
   BrandNotUpdated = '3016',
+  // 진행채널과 모집조건이 유효하지 않습니다. : 3020
+  ChannelConditionMismatch = '3020',
+  // 캠페인 생성에 실패하였습니다. : 3021
+  CampaignNotCreated = '3021',
 }
 
-export enum UncatchedExceptionCodeEnum {
+export enum UncaughtExceptionCodeEnum {
   // 애플리케이션 레벨에서 처리하지 못한 에러
-  UnCatched = '9999',
+  UnCaught = '9999',
 }
