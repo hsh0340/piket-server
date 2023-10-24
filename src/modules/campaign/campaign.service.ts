@@ -13,6 +13,10 @@ import { ConfigService } from '@nestjs/config';
 import { CreateWritingCampaignRequestDto } from '@src/modules/campaign/dto/create-writing-campaign-request.dto';
 import { CreateCampaignRequestDto } from '@src/modules/campaign/dto/create-campaign-request.dto';
 import { PrismaService } from '@src/modules/prisma/prisma.service';
+import {
+  CreateCommonCampaignInput,
+  CreateVisitingCampaignInput,
+} from '@src/modules/campaign/interfaces/campaign.interface';
 
 @Injectable()
 export class CampaignService {
@@ -107,11 +111,11 @@ export class CampaignService {
   }
 
   /**
-   * 옵션 배열 내의 각 객체에 campaign 고유 번호를 추가하는 메서드
+   * 옵션 배열 내의 value 의 타입을 array 에서 string 으로 변환하는 메서드
    * @param options 옵션 배열
-   * @param campaignId 캠페인 고유 번호
+   * @return value 의 타입을 array 에서 string 으로 변환한 배열을 반환합니다.
    */
-  async changeDataFormatOfOptionAndInsert(options) {
+  async changeOptionValueFromJsonToJson(options) {
     return options.map((obj) => {
       const valueString = JSON.stringify(obj.value);
 
@@ -159,17 +163,17 @@ export class CampaignService {
   }
 
   /**
-   * 배송형/방문형/기자단 캠페인 등록시 공통으로 실행될 메서드
+   * 배송형/방문형/기자단 캠페인 create 메서드에서 공통으로 필요한 데이터를 포함한 객체를 생성하는 메서드
    * @param advertiser 광고주 객체
    * @param campaignType 캠페인 진행 유형
-   * @param createCampaignRequestDto 캠페인 셍성 DTO
-   * @return 생성된 캠페인의 고유 번호를 반환합니다.
+   * @param createCampaignRequestDto 캠페인 생성 DTO
+   * @return prisma.campaign.create 메서드 실행시 등록시 공통으로 필요한 데이터를 포함한 객체를 반환합니다.
    */
-  async createCommonCampaignObject(
+  async generateCommonCreateCampaignObject(
     advertiser: UserEntity,
     campaignType: number,
     createCampaignRequestDto: CreateCampaignRequestDto,
-  ): Promise<number> {
+  ) {
     const {
       brandId,
       channel,
@@ -192,244 +196,27 @@ export class CampaignService {
 
     await this.verifyBrandExists(brandId, advertiser);
 
-    const campaign = await this.prismaService.campaign.create({
-      data: {
-        brandId,
-        advertiserNo: advertiser.no,
-        channelConditionId,
-        type: CampaignType.VISITING,
-        recruitmentStartsDate: new Date(recruitmentStartsDate),
-        recruitmentEndsDate: new Date(recruitmentEndsDate),
-        selectionEndsDate: new Date(selectionEndsDate),
-        submitStartsDate: new Date(submitStartsDate),
-        submitEndsDate: new Date(submitEndsDate),
-        hashtag: JSON.stringify(hashtag),
-        ...rest,
-      },
-    });
-
     const thumbnailFileName = advertiser.no + this.generateRandomFileName();
     const thumbnailBuffer = this.decodeBase64ImageToBuffer(thumbnail);
-
     await this.uploadImageToS3(thumbnailFileName, thumbnailBuffer);
 
-    /*
-     * S3에 저장된 이미지 파일들의 객체 url 을 DB에 저장합니다.
-     */
-    await this.prismaService.campaignThumbnail.create({
-      data: {
-        campaignId: campaign.id,
-        fileUrl: this.generateS3FileUrl(advertiser.no, thumbnailFileName),
-      },
-    });
-
-    if (images && images.length > 0) {
-      const detailedImageFileNamesArr = Array(images.length)
-        .fill('')
-        .map(() => advertiser.no + this.generateRandomFileName());
-      const detailedImagesForDBInsertion: {
-        campaignId: number;
-        fileUrl: string;
-      }[] = [];
-      const bufferedDetailedImagesArr: Buffer[] = [];
-
-      images.forEach((detailedImage, index) => {
-        /*
-         * images 배열의 모든 원소를 디코딩 하여 bufferedDetailedImagesArr 배열에 push 합니다.
-         */
-        const imageBuffer = this.decodeBase64ImageToBuffer(detailedImage);
-
-        bufferedDetailedImagesArr.push(imageBuffer);
-
-        /*
-         * prisma createMany의 data 절에서 사용하기 위한 detailedImagesForInsertion 배열에 키 값이 campaignId, fileUrl 인 객체를 push 합니다.
-         */
-
-        detailedImagesForDBInsertion.push({
-          campaignId: campaign.id,
-          fileUrl: this.generateS3FileUrl(
-            advertiser.no,
-            detailedImageFileNamesArr[index],
-          ),
-        });
-      }); // end of forEach
-
-      bufferedDetailedImagesArr.map(async (bufferedImage, index) => {
-        await this.uploadImageToS3(
-          detailedImageFileNamesArr[index],
-          bufferedImage,
-        );
-      });
-
-      await this.prismaService.campaignImage.createMany({
-        data: detailedImagesForDBInsertion,
-      });
-    } // end of if
-
-    return campaign.id;
-  }
-
-  createWritingCampaign(
-    advertiser: UserEntity,
-    createWritingCampaignRequestDto: CreateWritingCampaignRequestDto,
-  ) {
-    return this.createCommonCampaignObject(
-      advertiser,
-      CampaignType.WRITING,
-      createWritingCampaignRequestDto,
-    );
-  }
-
-  async createVisitingCampaign(
-    advertiser: UserEntity,
-    createVisitingCampaignRequestDto: CreateVisitingCampaignRequestDto,
-  ): Promise<void> {
-    const {
-      options,
-      visitingAddr,
-      visitingTime,
-      note,
-      visitingEndsDate,
-      servicePrice,
-      info,
-      ...createCampaignRequestDto
-    } = createVisitingCampaignRequestDto;
-
-    const campaignId = await this.createCommonCampaignObject(
-      advertiser,
-      CampaignType.VISITING,
-      createCampaignRequestDto,
-    );
-
-    if (options) {
-      await this.changeDataFormatOfOptionAndInsert(options);
-    }
-
-    // 방문형 캠페인 추가정보 insert
-    await this.prismaService.campaignVisitingInfo.create({
-      data: {
-        campaignId: 100,
-        visitingAddr,
-        visitingTime,
-        note,
-        visitingEndsDate: new Date(visitingEndsDate),
-        servicePrice,
-        info,
-      },
-    });
-  }
-
-  async newCreateVisitingCampaign(
-    advertiser: UserEntity,
-    createVisitingCampaignRequestDto: CreateVisitingCampaignRequestDto,
-  ) {
-    const {
-      brandId,
-      title,
-      reward,
-      channel,
-      recruitment,
-      recruitmentCondition,
-      recruitmentStartsDate,
-      recruitmentEndsDate,
-      selectionEndsDate,
-      submitStartsDate,
-      submitEndsDate,
-      hashtag,
-      thumbnail,
-      images,
-      visitingAddr,
-      visitingTime,
-      note,
-      visitingEndsDate,
-      servicePrice,
-      options,
-      info,
-      postingGuide,
-      caution,
-      company,
-      managerName,
-      managerTel,
-      managerEmail,
-    } = createVisitingCampaignRequestDto;
-    const thumbnailFileName = advertiser.no + this.generateRandomFileName();
-
-    const dataForCreateVisitingCampaign2: {
-      brandId: number;
-      advertiserNo: number;
-      title: string;
-      reward: number;
-      channelConditionId: number;
-      postingGuide: string | null;
-      caution: string | null;
-      type: number;
-      recruitment: number;
-      recruitmentStartsDate: Date;
-      recruitmentEndsDate: Date;
-      selectionEndsDate: Date;
-      submitStartsDate: Date;
-      submitEndsDate: Date;
-      hashtag: string;
-      company: string;
-      managerName: string;
-      managerTel: string;
-      managerEmail: string | null;
-      campaignVisitingInfo: {
-        create: {
-          note: string;
-          visitingAddr: string;
-          visitingTime: string;
-          visitingEndsDate: Date;
-          servicePrice: number;
-          info: string;
-        };
-      };
-      campaignThumbnail: { create: { fileUrl: string } };
-      campaignImage?: {
-        createMany: {
-          data: { fileUrl: string }[];
-        };
-      };
-      campaignOption?: {
-        createMany: {
-          data: { name: string; value: string }[];
-        };
-      };
-    } = {
+    const commonInputObjectForCreateCampaign: CreateCommonCampaignInput = {
       brandId,
       advertiserNo: advertiser.no,
-      title,
-      reward,
-      channelConditionId: 3,
-      postingGuide,
-      caution,
-      type: CampaignType.VISITING,
-      recruitment,
+      channelConditionId,
+      type: campaignType,
       recruitmentStartsDate: new Date(recruitmentStartsDate),
       recruitmentEndsDate: new Date(recruitmentEndsDate),
       selectionEndsDate: new Date(selectionEndsDate),
       submitStartsDate: new Date(submitStartsDate),
       submitEndsDate: new Date(submitEndsDate),
       hashtag: JSON.stringify(hashtag),
-      company,
-      managerName,
-      managerTel,
-      managerEmail,
-      campaignVisitingInfo: {
-        create: {
-          note,
-          visitingAddr,
-          visitingTime,
-          visitingEndsDate: new Date(visitingEndsDate),
-          servicePrice,
-          info,
-        },
-      },
       campaignThumbnail: {
         create: {
           fileUrl: this.generateS3FileUrl(advertiser.no, thumbnailFileName),
         },
       },
+      ...rest,
     };
 
     if (images && images.length > 0) {
@@ -468,28 +255,86 @@ export class CampaignService {
         );
       });
 
-      dataForCreateVisitingCampaign2.campaignImage = {
+      commonInputObjectForCreateCampaign.campaignImage = {
         createMany: { data: detailedImagesForDBInsertion },
       };
     }
 
-    if (options) {
-      const optionArr = await this.changeDataFormatOfOptionAndInsert(options);
-      dataForCreateVisitingCampaign2.campaignOption = {
-        createMany: { data: optionArr },
-      };
-    }
+    return commonInputObjectForCreateCampaign;
+  }
 
-    console.log(dataForCreateVisitingCampaign2);
+  async createWritingCampaign(
+    advertiser: UserEntity,
+    createWritingCampaignRequestDto: CreateWritingCampaignRequestDto,
+  ) {
+    const inputObjectForCreateWritingCampaign =
+      await this.generateCommonCreateCampaignObject(
+        advertiser,
+        CampaignType.WRITING,
+        createWritingCampaignRequestDto,
+      );
 
-    // 최종적으로
     try {
       await this.prismaService.campaign.create({
-        data: dataForCreateVisitingCampaign2,
+        data: inputObjectForCreateWritingCampaign,
       });
     } catch (err) {
       console.log(err);
       throw new BadRequestException('캠페인 생성 실패');
     }
   }
+
+  async createVisitingCampaign(
+    advertiser: UserEntity,
+    createVisitingCampaignRequestDto: CreateVisitingCampaignRequestDto,
+  ) {
+    const {
+      visitingAddr,
+      visitingTime,
+      note,
+      visitingEndsDate,
+      servicePrice,
+      options,
+      info,
+      ...createCampaignRequestDto
+    } = createVisitingCampaignRequestDto;
+
+    const commonCampaignObject = await this.generateCommonCreateCampaignObject(
+      advertiser,
+      CampaignType.VISITING,
+      createCampaignRequestDto,
+    );
+
+    const inputObjectForCreateVisitingCampaign: CreateVisitingCampaignInput = {
+      ...commonCampaignObject,
+      campaignVisitingInfo: {
+        create: {
+          note,
+          visitingAddr,
+          visitingTime,
+          visitingEndsDate: new Date(visitingEndsDate),
+          servicePrice,
+          info,
+        },
+      },
+    };
+
+    if (options) {
+      const optionArr = await this.changeOptionValueFromJsonToJson(options);
+      inputObjectForCreateVisitingCampaign.campaignOption = {
+        createMany: { data: optionArr },
+      };
+    }
+
+    // 최종적으로
+    try {
+      await this.prismaService.campaign.create({
+        data: inputObjectForCreateVisitingCampaign,
+      });
+    } catch (err) {
+      console.log(err);
+      throw new BadRequestException('캠페인 생성 실패');
+    }
+  }
+
 }
