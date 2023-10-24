@@ -38,6 +38,8 @@ export enum RequestExceptionCodeEnum {
   ChannelConditionMismatch = '3020',
   // 캠페인 생성에 실패하였습니다. : 3021
   CampaignNotCreated = '3021',
+  // S3에 파일 업로드를 실패하였습니다. : 3022
+  S3NotUploaded = '3022',
 }
 
 export enum UncaughtExceptionCodeEnum {
