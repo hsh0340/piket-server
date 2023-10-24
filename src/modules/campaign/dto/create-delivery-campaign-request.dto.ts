@@ -24,7 +24,7 @@ import { IsArray, IsOptional } from 'class-validator';
  * @property managerEmail {string | null} 이메일
  * @property options {Array<{ name: string; values: Array<string> }> | null} 옵션 배열
  */
-export class CreateDeliveryCampaignDto extends PickType(
+export class CreateDeliveryCampaignRequestDto extends PickType(
   CreateCampaignRequestDto,
   [
     'brandId',
