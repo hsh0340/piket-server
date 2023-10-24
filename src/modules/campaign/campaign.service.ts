@@ -15,8 +15,10 @@ import { CreateCampaignRequestDto } from '@src/modules/campaign/dto/create-campa
 import { PrismaService } from '@src/modules/prisma/prisma.service';
 import {
   CreateCommonCampaignInput,
+  CreateDeliveryCampaignInput,
   CreateVisitingCampaignInput,
 } from '@src/modules/campaign/interfaces/campaign.interface';
+import { CreateDeliveryCampaignRequestDto } from '@src/modules/campaign/dto/create-delivery-campaign-request.dto';
 
 @Injectable()
 export class CampaignService {
@@ -163,7 +165,7 @@ export class CampaignService {
   }
 
   /**
-   * 배송형/방문형/기자단 캠페인 create 메서드에서 공통으로 필요한 데이터를 포함한 객체를 생성하는 메서드
+   * 배송형/방문형/기자단 캠페인 create 메서드에서 공통으로 필요한 데이터를 포함한 객체를 생성하고, 공통적으로 실행해야할 로직을 포함한 메서드
    * @param advertiser 광고주 객체
    * @param campaignType 캠페인 진행 유형
    * @param createCampaignRequestDto 캠페인 생성 DTO
@@ -337,4 +339,49 @@ export class CampaignService {
     }
   }
 
+  async createDeliveryCampaign(
+    advertiser: UserEntity,
+    createDeliveryCampaignRequestDto: CreateDeliveryCampaignRequestDto,
+  ) {
+    const {
+      experienceEndsDate,
+      productPrice,
+      options,
+      info,
+      ...createCampaignRequestDto
+    } = createDeliveryCampaignRequestDto;
+
+    const commonCampaignObject = await this.generateCommonCreateCampaignObject(
+      advertiser,
+      CampaignType.DELIVERY,
+      createCampaignRequestDto,
+    );
+
+    const inputObjectForCreateDeliveryCampaign: CreateDeliveryCampaignInput = {
+      ...commonCampaignObject,
+      campaignDeliveryInfo: {
+        create: {
+          experienceEndsDate: new Date(experienceEndsDate),
+          productPrice,
+          info,
+        },
+      },
+    };
+
+    if (options) {
+      const optionArr = await this.changeOptionValueFromJsonToJson(options);
+      inputObjectForCreateDeliveryCampaign.campaignOption = {
+        createMany: { data: optionArr },
+      };
+    }
+
+    try {
+      await this.prismaService.campaign.create({
+        data: inputObjectForCreateDeliveryCampaign,
+      });
+    } catch (err) {
+      console.log(err);
+      throw new BadRequestException('캠페인 생성 실패');
+    }
+  }
 }
