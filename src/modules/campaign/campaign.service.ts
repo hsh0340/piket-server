@@ -17,6 +17,11 @@ import {
   CreateDeliveryCampaignInput,
   CreateVisitingCampaignInput,
 } from '@src/modules/campaign/interfaces/campaign.interface';
+import {
+  BrandNotExistsException,
+  CampaignNotCreatedException,
+  ChannelConditionMismatchException
+} from "@src/common/exceptions/request.exception";
 
 @Injectable()
 export class CampaignService {
@@ -77,7 +82,7 @@ export class CampaignService {
       });
 
     if (!channelConditionCode) {
-      throw new BadRequestException('채널과 모집조건이 유효하지 않습니다.');
+      throw new ChannelConditionMismatchException();
     }
 
     return channelConditionCode.id;
@@ -104,7 +109,7 @@ export class CampaignService {
     });
 
     if (!existingBrand) {
-      throw new BadRequestException('존재하지 않는 브랜드입니다.');
+      throw new BrandNotExistsException();
     }
 
     return;
@@ -280,7 +285,7 @@ export class CampaignService {
       });
     } catch (err) {
       console.log(err);
-      throw new BadRequestException('캠페인 생성 실패');
+      throw new CampaignNotCreatedException();
     }
   }
 
@@ -332,7 +337,7 @@ export class CampaignService {
       });
     } catch (err) {
       console.log(err);
-      throw new BadRequestException('캠페인 생성 실패');
+      throw new CampaignNotCreatedException();
     }
   }
 
@@ -378,7 +383,7 @@ export class CampaignService {
       });
     } catch (err) {
       console.log(err);
-      throw new BadRequestException('캠페인 생성 실패');
+      throw new CampaignNotCreatedException();
     }
   }
 }
