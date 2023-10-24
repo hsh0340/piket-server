@@ -49,6 +49,8 @@ export class CreateDeliveryCampaignRequestDto extends PickType(
     'images',
   ] as const,
 ) {
+  experienceEndsDate: string;
+  productPrice: number;
   /*
    * 옵션 3개 까지만 등록 가능
    */
