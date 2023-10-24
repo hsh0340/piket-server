@@ -9,7 +9,7 @@ import {
 
 import { Request, Response } from 'express';
 import { BaseException } from '@src/common/exceptions/base.exception';
-import { UnCatchedException } from '@src/common/exceptions/uncatched.exception';
+import { UncaughtException } from '@src/common/exceptions/uncaught.exception';
 
 @Catch()
 export class HttpExceptionFilter implements ExceptionFilter {
@@ -21,7 +21,7 @@ export class HttpExceptionFilter implements ExceptionFilter {
     const response = ctx.getResponse();
 
     const res =
-      exception instanceof BaseException ? exception : new UnCatchedException();
+      exception instanceof BaseException ? exception : new UncaughtException();
     // const statusCode = (exception as BaseException).getStatus();
     const message = (exception as BaseException).message;
 
