@@ -42,5 +42,5 @@ export enum RequestExceptionCodeEnum {
 
 export enum UncaughtExceptionCodeEnum {
   // 애플리케이션 레벨에서 처리하지 못한 에러
-  UnCaught = '9999',
+  Uncaught = '9999',
 }
