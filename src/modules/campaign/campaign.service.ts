@@ -107,22 +107,16 @@ export class CampaignService {
   }
 
   /**
-   * 옵션 배열 내의 각 객체에 campaign 고유 번호를 추가하고, 옵션 DB에 insert 하는 메서드
+   * 옵션 배열 내의 각 객체에 campaign 고유 번호를 추가하는 메서드
    * @param options 옵션 배열
    * @param campaignId 캠페인 고유 번호
    */
-  async changeDataFormatOfOptionAndInsert(options, campaignId: number) {
-    const formattedOptionArr = options.map((obj) => {
+  async changeDataFormatOfOptionAndInsert(options) {
+    return options.map((obj) => {
       const valueString = JSON.stringify(obj.value);
 
-      return { name: obj.name, value: valueString, campaignId };
+      return { name: obj.name, value: valueString };
     });
-
-    await this.prismaService.campaignOption.createMany({
-      data: formattedOptionArr,
-    });
-
-    return;
   }
 
   /**
@@ -171,7 +165,7 @@ export class CampaignService {
    * @param createCampaignRequestDto 캠페인 셍성 DTO
    * @return 생성된 캠페인의 고유 번호를 반환합니다.
    */
-  async createCampaign(
+  async createCommonCampaignObject(
     advertiser: UserEntity,
     campaignType: number,
     createCampaignRequestDto: CreateCampaignRequestDto,
@@ -279,7 +273,7 @@ export class CampaignService {
     advertiser: UserEntity,
     createWritingCampaignRequestDto: CreateWritingCampaignRequestDto,
   ) {
-    return this.createCampaign(
+    return this.createCommonCampaignObject(
       advertiser,
       CampaignType.WRITING,
       createWritingCampaignRequestDto,
@@ -301,20 +295,20 @@ export class CampaignService {
       ...createCampaignRequestDto
     } = createVisitingCampaignRequestDto;
 
-    const campaignId = await this.createCampaign(
+    const campaignId = await this.createCommonCampaignObject(
       advertiser,
       CampaignType.VISITING,
       createCampaignRequestDto,
     );
 
     if (options) {
-      await this.changeDataFormatOfOptionAndInsert(options, campaignId);
+      await this.changeDataFormatOfOptionAndInsert(options);
     }
 
     // 방문형 캠페인 추가정보 insert
     await this.prismaService.campaignVisitingInfo.create({
       data: {
-        campaignId,
+        campaignId: 100,
         visitingAddr,
         visitingTime,
         note,
@@ -323,5 +317,179 @@ export class CampaignService {
         info,
       },
     });
+  }
+
+  async newCreateVisitingCampaign(
+    advertiser: UserEntity,
+    createVisitingCampaignRequestDto: CreateVisitingCampaignRequestDto,
+  ) {
+    const {
+      brandId,
+      title,
+      reward,
+      channel,
+      recruitment,
+      recruitmentCondition,
+      recruitmentStartsDate,
+      recruitmentEndsDate,
+      selectionEndsDate,
+      submitStartsDate,
+      submitEndsDate,
+      hashtag,
+      thumbnail,
+      images,
+      visitingAddr,
+      visitingTime,
+      note,
+      visitingEndsDate,
+      servicePrice,
+      options,
+      info,
+      postingGuide,
+      caution,
+      company,
+      managerName,
+      managerTel,
+      managerEmail,
+    } = createVisitingCampaignRequestDto;
+    const thumbnailFileName = advertiser.no + this.generateRandomFileName();
+
+    const dataForCreateVisitingCampaign2: {
+      brandId: number;
+      advertiserNo: number;
+      title: string;
+      reward: number;
+      channelConditionId: number;
+      postingGuide: string | null;
+      caution: string | null;
+      type: number;
+      recruitment: number;
+      recruitmentStartsDate: Date;
+      recruitmentEndsDate: Date;
+      selectionEndsDate: Date;
+      submitStartsDate: Date;
+      submitEndsDate: Date;
+      hashtag: string;
+      company: string;
+      managerName: string;
+      managerTel: string;
+      managerEmail: string | null;
+      campaignVisitingInfo: {
+        create: {
+          note: string;
+          visitingAddr: string;
+          visitingTime: string;
+          visitingEndsDate: Date;
+          servicePrice: number;
+          info: string;
+        };
+      };
+      campaignThumbnail: { create: { fileUrl: string } };
+      campaignImage?: {
+        createMany: {
+          data: { fileUrl: string }[];
+        };
+      };
+      campaignOption?: {
+        createMany: {
+          data: { name: string; value: string }[];
+        };
+      };
+    } = {
+      brandId,
+      advertiserNo: advertiser.no,
+      title,
+      reward,
+      channelConditionId: 3,
+      postingGuide,
+      caution,
+      type: CampaignType.VISITING,
+      recruitment,
+      recruitmentStartsDate: new Date(recruitmentStartsDate),
+      recruitmentEndsDate: new Date(recruitmentEndsDate),
+      selectionEndsDate: new Date(selectionEndsDate),
+      submitStartsDate: new Date(submitStartsDate),
+      submitEndsDate: new Date(submitEndsDate),
+      hashtag: JSON.stringify(hashtag),
+      company,
+      managerName,
+      managerTel,
+      managerEmail,
+      campaignVisitingInfo: {
+        create: {
+          note,
+          visitingAddr,
+          visitingTime,
+          visitingEndsDate: new Date(visitingEndsDate),
+          servicePrice,
+          info,
+        },
+      },
+      campaignThumbnail: {
+        create: {
+          fileUrl: this.generateS3FileUrl(advertiser.no, thumbnailFileName),
+        },
+      },
+    };
+
+    if (images && images.length > 0) {
+      const detailedImageFileNamesArr = Array(images.length)
+        .fill('')
+        .map(() => advertiser.no + this.generateRandomFileName());
+      const detailedImagesForDBInsertion: {
+        fileUrl: string;
+      }[] = [];
+      const bufferedDetailedImagesArr: Buffer[] = [];
+
+      images.forEach((detailedImage, index) => {
+        /*
+         * images 배열의 모든 원소를 디코딩 하여 bufferedDetailedImagesArr 배열에 push 합니다.
+         */
+        const imageBuffer = this.decodeBase64ImageToBuffer(detailedImage);
+
+        bufferedDetailedImagesArr.push(imageBuffer);
+
+        /*
+         * prisma createMany의 data 절에서 사용하기 위한 detailedImagesForInsertion 배열에 키 값이 campaignId, fileUrl 인 객체를 push 합니다.
+         */
+
+        detailedImagesForDBInsertion.push({
+          fileUrl: this.generateS3FileUrl(
+            advertiser.no,
+            detailedImageFileNamesArr[index],
+          ),
+        });
+      }); // end of forEach
+
+      bufferedDetailedImagesArr.map(async (bufferedImage, index) => {
+        await this.uploadImageToS3(
+          detailedImageFileNamesArr[index],
+          bufferedImage,
+        );
+      });
+
+      dataForCreateVisitingCampaign2.campaignImage = {
+        createMany: { data: detailedImagesForDBInsertion },
+      };
+    }
+
+    if (options) {
+      const optionArr = await this.changeDataFormatOfOptionAndInsert(options);
+      dataForCreateVisitingCampaign2.campaignOption = {
+        createMany: { data: optionArr },
+      };
+    }
+
+    console.log(dataForCreateVisitingCampaign2);
+
+    // 최종적으로
+    try {
+      await this.prismaService.campaign.create({
+        data: dataForCreateVisitingCampaign2,
+      });
+    } catch (err) {
+      console.log(err);
+      throw new BadRequestException('캠페인 생성 실패');
+    }
   }
 }
