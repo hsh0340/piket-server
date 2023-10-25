@@ -4,6 +4,7 @@ import {
   IsString,
   Matches,
   MaxLength,
+  IsOptional,
 } from 'class-validator';
 import { BrandCategory } from '@src/common/constants/enum';
 
@@ -23,6 +24,7 @@ export class CreateBrandRequestDto {
   @MaxLength(10)
   name: string;
 
+  @IsOptional()
   @IsString()
   @Matches(/^[a-zA-Z0-9가-힣 ]*$/)
   @MaxLength(30)
