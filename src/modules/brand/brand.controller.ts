@@ -40,10 +40,13 @@ export class BrandController {
   async createBrand(
     @User() advertiser: UserEntity,
     @Body() createBrandRequestDto: CreateBrandRequestDto,
-  ): Promise<string> {
-    await this.brandService.createBrand(advertiser, createBrandRequestDto);
+  ): Promise<{ brandId: number }> {
+    const brandId = await this.brandService.createBrand(
+      advertiser,
+      createBrandRequestDto,
+    );
 
-    return '브랜드가 생성되었습니다.';
+    return { brandId };
   }
 
   // 브랜드 수정 API

@@ -55,14 +55,16 @@ export class BrandService {
   async createBrand(
     advertiser: UserEntity,
     createBrandRequestDto: CreateBrandRequestDto,
-  ): Promise<void> {
+  ): Promise<number> {
     try {
-      await this.prismaService.brand.create({
+      const newBrand = await this.prismaService.brand.create({
         data: {
           advertiserNo: advertiser.no,
           ...createBrandRequestDto,
         },
       });
+
+      return newBrand.id;
     } catch (err) {
       if (err.code === 'P2002') {
         throw new BrandExistsException();
