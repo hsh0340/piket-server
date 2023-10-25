@@ -279,7 +279,6 @@ export class CampaignService {
         data: inputObjectForCreateWritingCampaign,
       });
     } catch (err) {
-      console.log(err);
       throw new CampaignNotCreatedException();
     }
   }
@@ -331,7 +330,6 @@ export class CampaignService {
         data: inputObjectForCreateVisitingCampaign,
       });
     } catch (err) {
-      console.log(err);
       throw new CampaignNotCreatedException();
     }
   }
@@ -377,7 +375,6 @@ export class CampaignService {
         data: inputObjectForCreateDeliveryCampaign,
       });
     } catch (err) {
-      console.log(err);
       throw new CampaignNotCreatedException();
     }
   }
