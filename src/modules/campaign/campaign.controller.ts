@@ -4,6 +4,10 @@ import {
   Post,
   UseGuards,
   UseInterceptors,
+  Get,
+  Param,
+  ParseIntPipe,
+  Query,
 } from '@nestjs/common';
 import { CampaignService } from '@src/modules/campaign/campaign.service';
 import { ResponseSerializationInterceptor } from '@src/common/interceptors/response-serialization.interceptor';
@@ -16,6 +20,7 @@ import { UserEntity } from '@src/entity/user.entity';
 import { CreateVisitingCampaignRequestDto } from '@src/modules/campaign/dto/create-visiting-campaign-request.dto';
 import { CreateWritingCampaignRequestDto } from '@src/modules/campaign/dto/create-writing-campaign-request.dto';
 import { CreateDeliveryCampaignRequestDto } from '@src/modules/campaign/dto/create-delivery-campaign-request.dto';
+import { GetCampaignsOfAdvertiserQueryDto } from '@src/modules/campaign/dto/get-campaigns-of-advertiser-query.dto';
 
 @UseInterceptors(ResponseSerializationInterceptor)
 @Controller('campaigns')
@@ -74,5 +79,18 @@ export class CampaignController {
     );
 
     return '캠페인이 등록되었습니다.';
+  }
+
+  /*
+   * 캠페인 관리(캠페인 목록 조회) API
+   */
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
+  @Roles(RoleType.ADVERTISER)
+  @Get()
+  async getCampaignsListOfAdvertiser(
+    @User() advertiser: UserEntity,
+    @Query() query: GetCampaignsOfAdvertiserQueryDto,
+  ) {
+    return await this.campaignService.getCampaignsListOfAdvertiser(advertiser, query);
   }
 }
