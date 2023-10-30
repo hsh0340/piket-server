@@ -92,6 +92,7 @@ model Campaign {
   managerName              String                   @map("manager_name") @db.VarChar(30)
   managerTel               String                   @map("manager_tel") @db.VarChar(30)
   managerEmail             String?                  @map("manager_email") @db.VarChar(50)
+  status                   Int                      @db.UnsignedTinyInt
   createdAt                DateTime                 @default(now()) @map("created_at") @db.DateTime(0)
   updatedAt                DateTime                 @default(now()) @map("updated_at") @db.DateTime(0)
   deletedAt                DateTime?                @map("deleted_at") @db.DateTime(0)
@@ -108,6 +109,7 @@ model Campaign {
   @@index([brandId], map: "campaign_brand_id_FK")
   @@index([channelConditionId], map: "campaign_channel_condition_id_FK")
   @@index([type], map: "campaign_type_IDX")
+  @@index([status], map: "campaign_status_IDX")
   @@map("campaign")
 }
 
