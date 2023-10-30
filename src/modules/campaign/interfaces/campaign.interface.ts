@@ -24,6 +24,7 @@ export interface CreateCommonCampaignInput {
       data: { fileUrl: string }[];
     };
   };
+  status: number;
 }
 
 export interface CreateVisitingCampaignInput {
