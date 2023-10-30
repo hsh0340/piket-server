@@ -4,7 +4,13 @@ import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '@src/modules/prisma/prisma.service';
 import { UserEntity } from '@src/entity/user.entity';
 import { CreateVisitingCampaignRequestDto } from '@src/modules/campaign/dto/create-visiting-campaign-request.dto';
-import { CampaignType } from '@src/common/constants/enum';
+import {
+  CampaignChannel,
+  CampaignChannelKorean,
+  CampaignType,
+  CampaignTypeKorean,
+  Category,
+} from '@src/common/constants/enum';
 import { CreateWritingCampaignRequestDto } from '@src/modules/campaign/dto/create-writing-campaign-request.dto';
 import { CreateCampaignRequestDto } from '@src/modules/campaign/dto/create-campaign-request.dto';
 import { CreateDeliveryCampaignRequestDto } from '@src/modules/campaign/dto/create-delivery-campaign-request.dto';
@@ -19,6 +25,7 @@ import {
   ChannelConditionMismatchException,
   S3NotUploadedException,
 } from '@src/common/exceptions/request.exception';
+import { GetCampaignsOfAdvertiserQueryDto } from '@src/modules/campaign/dto/get-campaigns-of-advertiser-query.dto';
 
 @Injectable()
 export class CampaignService {
@@ -211,6 +218,7 @@ export class CampaignService {
       submitStartsDate: new Date(submitStartsDate),
       submitEndsDate: new Date(submitEndsDate),
       hashtag: JSON.stringify(hashtag),
+      status: 1,
       campaignThumbnail: {
         create: {
           fileUrl: this.generateS3FileUrl(advertiser.no, thumbnailFileName),
@@ -283,6 +291,11 @@ export class CampaignService {
     }
   }
 
+  /**
+   * 방문형 캠페페인을 등록하는 메서드
+   * @param advertiser 유저 객체
+   * @param createVisitingCampaignRequestDto 벙뮨형 캠페인 생성 DTO
+   */
   async createVisitingCampaign(
     advertiser: UserEntity,
     createVisitingCampaignRequestDto: CreateVisitingCampaignRequestDto,
@@ -334,10 +347,15 @@ export class CampaignService {
     }
   }
 
+  /**
+   * 배송형 캠페인을 등록하는 메서드
+   * @param advertiser 유저 객체
+   * @param createDeliveryCampaignRequestDto 배송형 캠페인 생성 DTO
+   */
   async createDeliveryCampaign(
     advertiser: UserEntity,
     createDeliveryCampaignRequestDto: CreateDeliveryCampaignRequestDto,
-  ) {
+  ): Promise<void> {
     const {
       experienceEndsDate,
       productPrice,
@@ -377,5 +395,100 @@ export class CampaignService {
     } catch (err) {
       throw new CampaignNotCreatedException();
     }
+  }
+
+  /**
+   * Date 형식의 데이터를 문자열로 변환하고 'T' 문자 이후의 문자를 제거하는 메서드
+   * @param date 날짜 데이터
+   * @return 'T' 문자 이후의 문자를 제거한 문자열을 반환합니다.
+   */
+  removeAfterTFromDate(date: Date): string {
+    return date.toISOString().split('T')[0];
+  }
+
+  /** 로그인한 광고주가 가지고 있는 캠페인의 리스트 조회 API
+   * @param
+   * @param advertiser
+   * @param query
+   */
+  async getCampaignsListOfAdvertiser(
+    advertiser: UserEntity,
+    query: GetCampaignsOfAdvertiserQueryDto,
+  ) {
+    const { page, pageSize } = query;
+
+    const campaignListArr = await this.prismaService.campaign.findMany({
+      skip: 0, // page 생략하는 데이터 갯수
+      take: 5, // page * pageSize 가져올 데이터 갯수
+      select: {
+        id: true,
+        brand: {
+          select: {
+            name: true,
+            brandCategory: {
+              select: {
+                name: true,
+              },
+            },
+          },
+        },
+        campaignChannelCondition: {
+          select: {
+            channel: true,
+          },
+        },
+        title: true,
+        type: true,
+        reward: true,
+        recruitment: true,
+        selectionEndsDate: true,
+        submitEndsDate: true,
+      },
+      where: {
+        advertiserNo: advertiser.no,
+      },
+    });
+
+    return campaignListArr.map((campaign) => {
+      const brandCategory = campaign.brand.brandCategory.name;
+
+      const type = campaign.type;
+      let newType: string;
+
+      if (type === CampaignType.DELIVERY) {
+        newType = CampaignTypeKorean.DELIVERY;
+      } else if (type === CampaignType.VISITING) {
+        newType = CampaignTypeKorean.VISITING;
+      } else {
+        newType = CampaignTypeKorean.WRITING;
+      }
+
+      const channel = campaign.campaignChannelCondition.channel;
+      let newChannel: string;
+
+      if (channel === CampaignChannel.NAVER_BLOG) {
+        newChannel = CampaignChannelKorean.NAVER_BLOG;
+      } else {
+        newChannel = CampaignChannelKorean.INSTAGRAM;
+      }
+
+      return {
+        id: campaign.id,
+        brandName: campaign.brand.name,
+        brandCategory: Category[brandCategory as keyof typeof Category],
+        channel: newChannel,
+        title: campaign.title,
+        type: newType,
+        reward: campaign.reward,
+        recruitment: campaign.recruitment,
+        numberOfApplicants: 0,
+        numberOfPeopleSelected: 0,
+        numberOfPeopleSubmitted: 0,
+        selectionEndsDate: this.removeAfterTFromDate(
+          campaign.selectionEndsDate,
+        ),
+        submitEndsDate: this.removeAfterTFromDate(campaign.submitEndsDate),
+      };
+    });
   }
 }
