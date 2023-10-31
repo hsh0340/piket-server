@@ -20,6 +20,7 @@ import { Roles } from '@src/modules/auth/decorators/roles.decorator';
 import { RoleType } from '@src/modules/auth/types/role-type';
 import { User } from '@src/modules/auth/decorators/user.decorator';
 import { ResponseSerializationInterceptor } from '@src/common/interceptors/response-serialization.interceptor';
+import { UserEntity } from '@src/entity/user.entity';
 
 @UseInterceptors(ResponseSerializationInterceptor)
 @Controller('users')
@@ -118,7 +119,7 @@ export class UserController {
   @UseGuards(AuthGuard('jwt'), RolesGuard)
   @Roles(RoleType.UNDEFINED)
   @Get('login-test')
-  loginAuthTest(@User() user) {
+  loginAuthTest(@User() user: UserEntity) {
     return user;
   }
 
