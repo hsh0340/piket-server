@@ -68,6 +68,7 @@ export interface CreateVisitingCampaignInput {
       data: { name: string; value: string }[];
     };
   };
+  status: number;
 }
 
 export interface CreateDeliveryCampaignInput {
@@ -108,4 +109,5 @@ export interface CreateDeliveryCampaignInput {
       data: { name: string; value: string }[];
     };
   };
+  status: number;
 }
