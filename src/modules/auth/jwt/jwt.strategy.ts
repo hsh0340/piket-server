@@ -35,7 +35,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
 
     // access token 유효시간 지났는지 확인
     const currentTime = Date.now() / 1000;
-    console.log(currentTime);
+
     if (currentTime > exp) {
       throw new UnauthorizedException('유효기간 만료');
     }
