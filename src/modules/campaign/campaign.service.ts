@@ -4,13 +4,13 @@ import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '@src/modules/prisma/prisma.service';
 import { UserEntity } from '@src/entity/user.entity';
 import { CreateVisitingCampaignRequestDto } from '@src/modules/campaign/dto/create-visiting-campaign-request.dto';
+import { CampaignTypeId } from '@src/common/constants/enum';
 import {
-  CampaignChannel,
-  CampaignChannelKorean,
-  CampaignType,
-  CampaignTypeKorean,
-  Category,
-} from '@src/common/constants/enum';
+  CAMPAIGN_STATUS_ID,
+  BRAND_CATEGORY_KOREAN,
+  CAMPAIGN_TYPE_KOREAN,
+  CAMPAIGN_STATUS_KOREAN,
+} from '@src/common/constants/constant';
 import { CreateWritingCampaignRequestDto } from '@src/modules/campaign/dto/create-writing-campaign-request.dto';
 import { CreateCampaignRequestDto } from '@src/modules/campaign/dto/create-campaign-request.dto';
 import { CreateDeliveryCampaignRequestDto } from '@src/modules/campaign/dto/create-delivery-campaign-request.dto';
@@ -124,7 +124,9 @@ export class CampaignService {
    * @param options 옵션 배열
    * @return value 의 타입을 array 에서 string 으로 변환한 배열을 반환합니다.
    */
-  async changeOptionValueFromJsonToJson(options) {
+  async changeOptionValueFromJsonToJson(
+    options: { name: string; value: string[] }[],
+  ) {
     return options.map((obj) => {
       const valueString = JSON.stringify(obj.value);
 
@@ -278,7 +280,7 @@ export class CampaignService {
     const inputObjectForCreateWritingCampaign =
       await this.generateCommonCreateCampaignObject(
         advertiser,
-        CampaignType.WRITING,
+        CampaignTypeId.WRITING,
         createWritingCampaignRequestDto,
       );
 
@@ -313,7 +315,7 @@ export class CampaignService {
 
     const commonCampaignObject = await this.generateCommonCreateCampaignObject(
       advertiser,
-      CampaignType.VISITING,
+      CampaignTypeId.VISITING,
       createCampaignRequestDto,
     );
 
@@ -366,7 +368,7 @@ export class CampaignService {
 
     const commonCampaignObject = await this.generateCommonCreateCampaignObject(
       advertiser,
-      CampaignType.DELIVERY,
+      CampaignTypeId.DELIVERY,
       createCampaignRequestDto,
     );
 
@@ -407,7 +409,6 @@ export class CampaignService {
   }
 
   /** 로그인한 광고주가 가지고 있는 캠페인의 리스트 조회 API
-   * @param
    * @param advertiser
    * @param query
    */
@@ -415,11 +416,21 @@ export class CampaignService {
     advertiser: UserEntity,
     query: GetCampaignsOfAdvertiserQueryDto,
   ) {
-    const { page, pageSize } = query;
+    const { status, page } = query;
+    const pageSize = 5;
+
+    // string 으로 받아온 status 의 ID 값을 변수에 저장합니다.
+    const statusId = CAMPAIGN_STATUS_ID[status];
+
+    // where 조건을 build 합니다.
+    const where = {
+      advertiserNo: advertiser.no,
+      status: statusId,
+    };
 
     const campaignListArr = await this.prismaService.campaign.findMany({
-      skip: 0, // page 생략하는 데이터 갯수
-      take: 5, // page * pageSize 가져올 데이터 갯수
+      skip: page * pageSize, // skip 하는 게시물 개수
+      take: pageSize, // 한 페이지당 아이템 갯수
       select: {
         id: true,
         brand: {
@@ -443,42 +454,31 @@ export class CampaignService {
         recruitment: true,
         selectionEndsDate: true,
         submitEndsDate: true,
+        status: true,
       },
       where: {
-        advertiserNo: advertiser.no,
+        ...where,
       },
     });
 
-    return campaignListArr.map((campaign) => {
-      const brandCategory = campaign.brand.brandCategory.name;
+    const campaignListForReturn = campaignListArr.map((campaign) => {
+      // 브랜드 카테고리명을 한글명으로 리턴합니다.
+      const brandCategoryNameKorean =
+        BRAND_CATEGORY_KOREAN[campaign.brand.brandCategory.name];
 
-      const type = campaign.type;
-      let newType: string;
+      // 캠페인 타입을 한글명으로 리턴합니다.
+      const campaignTypeKorean = CAMPAIGN_TYPE_KOREAN[campaign.type];
 
-      if (type === CampaignType.DELIVERY) {
-        newType = CampaignTypeKorean.DELIVERY;
-      } else if (type === CampaignType.VISITING) {
-        newType = CampaignTypeKorean.VISITING;
-      } else {
-        newType = CampaignTypeKorean.WRITING;
-      }
-
-      const channel = campaign.campaignChannelCondition.channel;
-      let newChannel: string;
-
-      if (channel === CampaignChannel.NAVER_BLOG) {
-        newChannel = CampaignChannelKorean.NAVER_BLOG;
-      } else {
-        newChannel = CampaignChannelKorean.INSTAGRAM;
-      }
+      // 캠페인 상태를 한글명으로 리턴합니다.
+      const campaignStatusKorean = CAMPAIGN_STATUS_KOREAN[campaign.status];
 
       return {
         id: campaign.id,
         brandName: campaign.brand.name,
-        brandCategory: Category[brandCategory as keyof typeof Category],
-        channel: newChannel,
+        brandCategory: brandCategoryNameKorean,
+        channel: campaign.campaignChannelCondition.channel,
         title: campaign.title,
-        type: newType,
+        type: campaignTypeKorean,
         reward: campaign.reward,
         recruitment: campaign.recruitment,
         numberOfApplicants: 0,
@@ -488,7 +488,16 @@ export class CampaignService {
           campaign.selectionEndsDate,
         ),
         submitEndsDate: this.removeAfterTFromDate(campaign.submitEndsDate),
+        status: campaignStatusKorean,
       };
     });
+
+    const totalCountQuery = await this.prismaService.campaign.count({
+      where: {
+        ...where,
+      },
+    });
+
+    return { campaigns: campaignListForReturn, totalCountQuery };
   }
 }
