@@ -15,7 +15,7 @@ export enum LoginType {
   NAVER = 3,
 }
 
-export enum BrandCategory {
+export enum BrandCategoryId {
   // 코스메틱 : 0
   COSMETIC = 0,
   // 육아 : 1
@@ -42,7 +42,7 @@ export enum BrandCategory {
   ETC = 11,
 }
 
-export enum CampaignType {
+export enum CampaignTypeId {
   // 배송형 : 0
   DELIVERY = 0,
   // 방문형 : 1
@@ -51,11 +51,22 @@ export enum CampaignType {
   WRITING = 2,
 }
 
+export enum CampaignTypeKorean {
+  DELIVERY = '배송형',
+  VISITING = '방문형',
+  WRITING = '기자단',
+}
+
 export enum CampaignChannel {
   // 네이버블로그 : 0
   NAVER_BLOG = 0,
   // 인스타그램 : 1
   INSTAGRAM = 1,
+}
+
+export enum CampaignChannelKorean {
+  NAVER_BLOG = '네이버 블로그',
+  INSTAGRAM = '인스타그램',
 }
 
 export enum CampaignRecruitmentCondition {
@@ -85,4 +96,45 @@ export enum CampaignRecruitmentCondition {
   BETWEEN_3000000_AND_3999999 = 23,
   BETWEEN_4000000_AND_4999999 = 24,
   MORE_THAN_5000000 = 25,
+}
+
+export enum CampaignStatusId {
+  TEMP = 0,
+  WAITING = 1,
+  ONGOING = 2,
+  CLOSED = 3,
+}
+
+export enum CampaignStatus {
+  TEMP = 'temp',
+  WAITING = 'waiting',
+  ONGOING = 'ongoing',
+  CLOSED = 'closed',
+}
+
+export enum BrandCategory {
+  // 코스메틱
+  COSMETIC = 'cosmetic',
+  // 육아
+  PARENTING = 'parenting',
+  // 맛집
+  RESTAURANT = 'restaurant',
+  // 패션
+  FASHION = 'fashion',
+  // 가전
+  HOME_APPLIANCE = 'homeAppliance',
+  // 여행
+  TRAVEL = 'travel',
+  // 반려
+  PET = 'pet',
+  // 식품
+  FOOD = 'food',
+  // 스포츠
+  SPORTS = 'sports',
+  // 문화
+  CULTURE = 'culture',
+  // 생활
+  LIVING = 'living',
+  // 기타
+  ETC = 'etc',
 }
