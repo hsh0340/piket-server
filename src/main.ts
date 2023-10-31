@@ -3,8 +3,8 @@ import { ConfigService } from '@nestjs/config';
 import helmet from 'helmet';
 import { HttpExceptionFilter } from '@src/common/filters/http-exception.filter';
 import { AppModule } from '@src/app.module';
-import { ValidationPipe } from '@src/common/pipes/validation.pipe';
 import { urlencoded, json } from 'body-parser';
+import { ValidationPipe } from '@nestjs/common';
 
 declare const module: any;
 
@@ -18,7 +18,13 @@ async function bootstrap() {
   app.use(helmet());
   app.enableCors();
 
-  app.useGlobalPipes(new ValidationPipe());
+  app.useGlobalPipes(
+    new ValidationPipe({
+      transform: true,
+      stopAtFirstError: true,
+      whitelist: true,
+    }),
+  );
   app.useGlobalFilters(new HttpExceptionFilter());
 
   const port = configService.get('PORT');
