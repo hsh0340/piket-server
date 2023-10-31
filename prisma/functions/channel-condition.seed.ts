@@ -1,3 +1,5 @@
+import { PrismaClient } from '@prisma/client';
+
 enum Channel {
   NAVER_BLOG = 0,
   INSTAGRAM = 1,
@@ -32,7 +34,7 @@ enum Condition {
   MORE_THAN_5000000 = 25,
 }
 
-export const channelConditionSeed = async (prisma) => {
+export const channelConditionSeed = async (prisma: PrismaClient) => {
   await prisma.campaignChannelCondition.createMany({
     data: [
       {

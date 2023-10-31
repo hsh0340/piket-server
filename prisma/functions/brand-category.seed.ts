@@ -1,3 +1,5 @@
+import { PrismaClient } from '@prisma/client';
+
 enum BrandCategory {
   // 코스메틱 : 0
   COSMETIC = 'cosmetic',
@@ -25,7 +27,7 @@ enum BrandCategory {
   ETC = 'etc',
 }
 
-export const brandCategorySeed = async (prisma) => {
+export const brandCategorySeed = async (prisma: PrismaClient) => {
   await prisma.brandCategory.createMany({
     data: [
       {

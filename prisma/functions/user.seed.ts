@@ -1,5 +1,6 @@
 import { fakerKO as faker } from '@faker-js/faker';
 import { fakerEN as fakerEN } from '@faker-js/faker';
+import { PrismaClient } from '@prisma/client';
 
 const getRandomLoginType = () => {
   // 0: 이메일, 1: 카카오, 2: 구글, 3: 네이버
@@ -15,9 +16,9 @@ const getRandomRoleType = () => {
   return roleTypeEnumValues[randomIdx];
 };
 
-export const userSeed = async (prisma) => {
+export const userSeed = async (prisma: PrismaClient) => {
   for (let i = 0; i < 500; i++) {
-    await prisma.$transaction(async (tx) => {
+    await prisma.$transaction(async (tx: any) => {
       const firstName = faker.person.firstName();
       const lastName = faker.person.lastName();
 

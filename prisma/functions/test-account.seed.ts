@@ -1,4 +1,6 @@
-export const testAccountSeed = async (prisma) => {
+import { PrismaClient } from '@prisma/client';
+
+export const testAccountSeed = async (prisma: PrismaClient) => {
   // 유저타입 미정
   await prisma.user.create({
     data: {
