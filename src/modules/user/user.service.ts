@@ -27,7 +27,7 @@ import { RoleType } from '@src/modules/auth/types/role-type';
 export class UserService {
   constructor(
     @Inject(CACHE_MANAGER)
-    private readonly cacheManager,
+    private readonly cacheManager: Cache,
     private readonly prismaService: PrismaService,
     private readonly authService: AuthService,
     private readonly mailerService: MailerService,
@@ -400,7 +400,7 @@ export class UserService {
    * @exception DB에 저장되어있는 비밀번호와 유저가 입력한 비밀번호가 다른 경우 TempPasswordIncorrectException 을 반환합니다.
    * @exception 비밀번호 업데이트에 실패한 경우 PasswordNotUpdatedException 을 반환합니다.
    */
-  async resetPassword(userNo: number, tempPassword, newPassword: string) {
+  async resetPassword(userNo: number, tempPassword: string, newPassword: string) {
     const userAuth = await this.prismaService.userAuthentication.findFirst({
       where: {
         userNo,
