@@ -5,8 +5,6 @@ import {
   UseGuards,
   UseInterceptors,
   Get,
-  Param,
-  ParseIntPipe,
   Query,
 } from '@nestjs/common';
 import { CampaignService } from '@src/modules/campaign/campaign.service';
@@ -91,6 +89,9 @@ export class CampaignController {
     @User() advertiser: UserEntity,
     @Query() query: GetCampaignsOfAdvertiserQueryDto,
   ) {
-    return await this.campaignService.getCampaignsListOfAdvertiser(advertiser, query);
+    return await this.campaignService.getCampaignsListOfAdvertiser(
+      advertiser,
+      query,
+    );
   }
 }
