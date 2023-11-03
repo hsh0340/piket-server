@@ -26,8 +26,6 @@ import { RoleType } from '@src/modules/auth/types/role-type';
 @Injectable()
 export class UserService {
   constructor(
-    @Inject(CACHE_MANAGER)
-    private readonly cacheManager: Cache,
     private readonly prismaService: PrismaService,
     private readonly authService: AuthService,
     private readonly mailerService: MailerService,
