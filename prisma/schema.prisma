@@ -1,5 +1,6 @@
 generator client {
-  provider = "prisma-client-js"
+  provider        = "prisma-client-js"
+  previewFeatures = ["fullTextIndex", "fullTextSearch"]
 }
 
 datasource db {
@@ -110,6 +111,7 @@ model Campaign {
   @@index([channelConditionId], map: "campaign_channel_condition_id_FK")
   @@index([type], map: "campaign_type_IDX")
   @@index([status], map: "campaign_status_IDX")
+  @@fulltext([title], map: "campaign_title_FIDX")
   @@map("campaign")
 }
 
