@@ -138,3 +138,30 @@ export enum BrandCategory {
   // 기타
   ETC = 'etc',
 }
+
+export enum BrandCategoryKorean {
+  // 코스메틱
+  COSMETIC = '코스메틱',
+  // 육아
+  PARENTING = '육아',
+  // 맛집
+  RESTAURANT = '맛집',
+  // 패션
+  FASHION = '패션',
+  // 가전
+  HOME_APPLIANCE = '가전',
+  // 여행
+  TRAVEL = '여행',
+  // 반려
+  PET = '반려',
+  // 식품
+  FOOD = '식품',
+  // 스포츠
+  SPORTS = '스포츠',
+  // 문화
+  CULTURE = '문화',
+  // 생활
+  LIVING = '생활',
+  // 기타
+  ETC = '기타',
+}
