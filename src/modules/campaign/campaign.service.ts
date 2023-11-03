@@ -10,6 +10,7 @@ import {
   BRAND_CATEGORY_KOREAN,
   CAMPAIGN_TYPE_KOREAN,
   CAMPAIGN_STATUS_KOREAN,
+  BRAND_CATEGORY_ENGLISH,
 } from '@src/common/constants/constant';
 import { CreateWritingCampaignRequestDto } from '@src/modules/campaign/dto/create-writing-campaign-request.dto';
 import { CreateCampaignRequestDto } from '@src/modules/campaign/dto/create-campaign-request.dto';
@@ -416,17 +417,52 @@ export class CampaignService {
     advertiser: UserEntity,
     query: GetCampaignsOfAdvertiserQueryDto,
   ) {
-    const { status, page } = query;
+    const { status, page, searchCategory, searchInput } = query;
     const pageSize = 5;
 
     // string 으로 받아온 status 의 ID 값을 변수에 저장합니다.
     const statusId = CAMPAIGN_STATUS_ID[status];
 
-    // where 조건을 build 합니다.
-    const where = {
-      advertiserNo: advertiser.no,
-      status: statusId,
-    };
+    let where;
+
+    // 제목
+    if (searchCategory && searchInput) {
+      // 제목 검색
+      if (searchCategory === 'title') {
+        where = {
+          advertiserNo: advertiser.no,
+          status: statusId,
+          [searchCategory]: {
+            search: searchInput,
+          },
+        };
+      }
+      if (searchCategory === 'brand') {
+        // 브랜드 검색
+        where = {
+          advertiserNo: advertiser.no,
+          status: statusId,
+          [searchCategory]: {
+            name: searchInput,
+          },
+        };
+      }
+      if (searchCategory === 'category') {
+        // 카테고리 검색
+
+        // 쿼리스트링으로 받은 한글을 영어로 변환합니다.
+        const searchInputEnglish = BRAND_CATEGORY_ENGLISH[searchInput];
+        where = {
+          advertiserNo: advertiser.no,
+          status: statusId,
+          brand: {
+            brandCategory: {
+              name: searchInputEnglish,
+            },
+          },
+        };
+      }
+    }
 
     const campaignListArr = await this.prismaService.campaign.findMany({
       skip: page * pageSize, // skip 하는 게시물 개수
@@ -465,6 +501,8 @@ export class CampaignService {
       // 브랜드 카테고리명을 한글명으로 리턴합니다.
       const brandCategoryNameKorean =
         BRAND_CATEGORY_KOREAN[campaign.brand.brandCategory.name];
+
+      console.log(campaign);
 
       // 캠페인 타입을 한글명으로 리턴합니다.
       const campaignTypeKorean = CAMPAIGN_TYPE_KOREAN[campaign.type];

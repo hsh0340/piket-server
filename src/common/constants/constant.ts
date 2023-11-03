@@ -1,23 +1,38 @@
 import {
-  BrandCategoryId,
+  BrandCategory, BrandCategoryKorean,
   CampaignStatus,
   CampaignStatusId,
-  CampaignTypeId,
-} from '@src/common/constants/enum';
+  CampaignTypeId
+} from "@src/common/constants/enum";
 
 export const BRAND_CATEGORY_KOREAN: { [key: string]: string } = {
-  [BrandCategoryId.COSMETIC]: '코스메틱',
-  [BrandCategoryId.PARENTING]: '육아',
-  [BrandCategoryId.RESTAURANT]: '맛집',
-  [BrandCategoryId.FASHION]: '패션',
-  [BrandCategoryId.HOME_APPLIANCE]: '가전',
-  [BrandCategoryId.TRAVEL]: '여행',
-  [BrandCategoryId.PET]: '반려',
-  [BrandCategoryId.FOOD]: '식품',
-  [BrandCategoryId.SPORTS]: '스포츠',
-  [BrandCategoryId.CULTURE]: '문화',
-  [BrandCategoryId.LIVING]: '생활',
-  [BrandCategoryId.ETC]: '기타',
+  [BrandCategory.COSMETIC]: '코스메틱',
+  [BrandCategory.PARENTING]: '육아',
+  [BrandCategory.RESTAURANT]: '맛집',
+  [BrandCategory.FASHION]: '패션',
+  [BrandCategory.HOME_APPLIANCE]: '가전',
+  [BrandCategory.TRAVEL]: '여행',
+  [BrandCategory.PET]: '반려',
+  [BrandCategory.FOOD]: '식품',
+  [BrandCategory.SPORTS]: '스포츠',
+  [BrandCategory.CULTURE]: '문화',
+  [BrandCategory.LIVING]: '생활',
+  [BrandCategory.ETC]: '기타',
+} as const;
+
+export const BRAND_CATEGORY_ENGLISH: { [key: string]: string } = {
+  [BrandCategoryKorean.COSMETIC]: 'cosmetic',
+  [BrandCategoryKorean.PARENTING]: 'parenting',
+  [BrandCategoryKorean.RESTAURANT]: 'restaurant',
+  [BrandCategoryKorean.FASHION]: 'fashion',
+  [BrandCategoryKorean.HOME_APPLIANCE]: 'home_appliance',
+  [BrandCategoryKorean.TRAVEL]: 'travel',
+  [BrandCategoryKorean.PET]: 'pet',
+  [BrandCategoryKorean.FOOD]: 'food',
+  [BrandCategoryKorean.SPORTS]: 'sports',
+  [BrandCategoryKorean.CULTURE]: 'culture',
+  [BrandCategoryKorean.LIVING]: 'living',
+  [BrandCategoryKorean.ETC]: 'etc',
 } as const;
 
 export const CAMPAIGN_STATUS_ID: { [key: string]: number } = {
