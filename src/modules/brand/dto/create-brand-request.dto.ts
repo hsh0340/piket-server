@@ -6,7 +6,7 @@ import {
   MaxLength,
   IsOptional,
 } from 'class-validator';
-import { BrandCategory } from '@src/common/constants/enum';
+import { BrandCategoryId } from '@src/common/constants/enum';
 
 /**
  * 브랜드 생성 DTO
@@ -16,7 +16,7 @@ import { BrandCategory } from '@src/common/constants/enum';
  */
 export class CreateBrandRequestDto {
   @IsNotEmpty()
-  @IsEnum(BrandCategory)
+  @IsEnum(BrandCategoryId)
   categoryId: number;
 
   @IsNotEmpty()
