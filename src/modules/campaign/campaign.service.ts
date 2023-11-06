@@ -495,6 +495,7 @@ export class CampaignService {
       where: {
         ...where,
       },
+      orderBy: [{ id: 'desc' }],
     });
 
     const campaignListForReturn = campaignListArr.map((campaign) => {
